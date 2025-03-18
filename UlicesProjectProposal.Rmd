@@ -1,0 +1,40 @@
+---
+output:
+  word_document: default
+  html_document: default
+---
+# MATH448 Project Proposal: Trends in Library Use
+
+## I. Team
+- Ulices Gonzalez
+
+## II. Description of the Problem
+
+In March of 2020 COVID-19 was declared a Pandemic Worldwide which disrupted infrastructure, business, travel, and the lifestyles of everyone. Given the manner in which the virus is transmitted many libraries had to close their doors. The American Library Association (ALA) surveyed libraries nationwide which included public and academic libraries, in their findings the ALA reported that almost 99% of participating libraries had limited to no access to their branches. Between March of 2020 to April 2021 most libraries were closed to the public and offering alternative services such as Front Door Service and Virtual Library Catalogs. Having been hired at the time of libraries being reopened nationwide, myself and other members of the public were not, and still not aware of the scale at which the Pandemic impacted the use of Library Branches. Libraries are not just used for checking out reading and visual materials but offer many resources to the public which range from computing, literacy programs, student meals, and many more necessities which many members of the public rely on. By looking at patron statistics from 2019 to 2024 it allows a better insight on the current state of library use while allowing us to understand the decline, recovery, and plateau libraries have had to face and still do and what factors have influenced this since.
+
+## III. Description of the Data
+
+The Chicago Public Library is home to 81 branches across 77 different community areas throughout the city of Chicago and have provided statistics over their library operations through Data.gov for the last 12 years. The Visitation by Location is a report of Patrons that visited a given library branch for services provided while excluding community room and program activities. The WiFi usage by Location is a report of patrons who logged into the WiFi network of a given library, does not exclude multiple devices from a given patron. The Computer Sessions by location is a report of 1 hour and 15 minute computer sessions at a given library, does not exclude consecutive sessions from a given patron. Item Circulations by Location is a report of Items checked out and renewed at a given library branch, renewals are treated as new check outs and are not their own statistic. All four Data Sets present statistics by month with a year to date total for each library branch associated with the Chicago Public Library.
+
+### Predictors
+- WiFi Usage
+- Computer Sessions
+- Item Circulation
+  
+### Data Sets
+- **Data set 1**: Chicago Public Library: 2019 - 2024 Visitation by Location
+- **Data set 2**: Chicago Public Library: 2019 - 2024 WiFi Usage by Location
+- **Data set 3**: Chicago Public Library: 2019 - 2024 Computer Sessions by Location
+- **Data set 4**: Chicago Public Library: 2019 - 2024 Item Circulation by Location
+
+## IV. Supervised or Unsupervised
+
+For this project an unsupervised learning approach will be used. The Data provided by the City of Chicago in regards to the Chicago Public Library shows the change in library patronage over the course of 5 years. Beginning in 2019 and ending in 2024 these data sets do not explicitly demonstrate any relationship on their own especially. This requires them to be cross-examined and observed closely in order to make out any relationships and trends across the four different data sets and how WiFi Usage, Computer Sessions, and Item Circulation factor in Library Visitation. 
+
+## V. Additional Comments
+
+### Challenges
+Due to the manner in which The Chicago Public Library data sets are provided, many predictors are separated into their own tables which require some additional work in order to combine them with other statistics collected in a give year. For example Item Circulation, WiFi Usage, and Computer Sessions are reported in their own sets so in order to look at their influence on Visitation. This will take some work and adjustment but is feasible due to the size of each given data set.
+  
+
+

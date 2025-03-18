@@ -1,0 +1,215 @@
+---
+title: "MATH 448 Project Progress Report I"
+author: "Ulices Gonzalez"
+date: "March 17th, 2025"
+output:
+  word_document: default
+  html_document:
+    fig_height: 4
+    highlight: pygments
+    theme: spacelab
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(dplyr)
+library(ggplot2)
+library(tidyverse)
+library(lubridate)
+library(DT)
+library(knitr)
+library(heatmaply)
+```
+
+* * *
+
+# Trends in Library Use Before, During, and After the COVID-19 Pandemic
+
+* * *
+
+## Introduction
+In March of 2020 COVID-19 was declared a Pandemic Worldwide which disrupted infrastructure, business, travel, and the lifestyles of everyone. Given the manner in which the virus is transmitted many libraries had to close their doors. The American Library Association (ALA) surveyed libraries nationwide which included public and academic libraries, in their findings the ALA reported that almost 99% of participating libraries had limited to no access to their branches. Between March of 2020 to April 2021 most libraries were closed to the public and offering alternative services such as Front Door Service and Virtual Library Catalogs. Having been hired at the time of libraries being reopened nationwide, myself and other members of the public were not, and still not aware of the scale at which the Pandemic impacted the use of Library Branches. Libraries are not just used for checking out reading and visual materials but offer many resources to the public which range from computing, literacy programs, student meals, and many more necessities which many members of the public rely on. By looking at patron statistics from 2019 to 2024 it allows a better insight on the current state of library use while allowing us to understand the decline, recovery, and plateau libraries have had to face and still do and what factors have influenced this since.
+
+## Description of Data and Variables
+The Chicago Public Library is home to 8 branches across 77 different community areas throughout the city of Chicago and have provided statistics over their library operations through Data.gov for the last 12 years. The Visitation by Location is a report of Patrons that visited a given library branch for services provided while excluding community room and program activities. The Holds by Location is a report of holds placed by patrons a given library, does not include holds placed online. The Computer Sessions by location is a report of 1 hour and 15 minute computer sessions at a given library, does not exclude consecutive sessions from a given patron. Item Circulations by Location is a report of Items checked out and renewed at a given library branch, renewals are treated as new check outs and are not their own statistic. All four Data Sets present statistics by month with a year to date total for each library branch associated with the Chicago Public Library.
+
+By using this data we can examine trends in library usage but also the impact the pandemic had on the usage of library services overall. Specifically by looking at the data from 2019 to understand the statistics prior to the pandemic we can get a good idea of where library usage peaked. Considering that the pandemic was officially declared in 2020 the best data to look at for the immediate impact would be 2021 as the data for 2022 would be after some safety guidelines were lifted. Lastly to see the overall impact the pandemic has had a year after it was officially declared over the data from 2024 will be considered and compared along with that of 2019 and 2021.
+
+## Data Processing 
+Due to the manner in which The Chicago Public Library data sets are provided, many predictors are separated into their own tables which require some additional work in order to combine them with other statistics collected in a give year. For example Item Circulation, Holds, and Computer Sessions are reported in their own sets so in order to look at their influence on Visitation. This took some work and adjustment but was a feasible task due to the size of each given data set being fixed. Some pieces of data were excluded from the final data set particularly online items, holds placed by patrons outside of a branch, and automatic renewals as these padded the statistics in a manner that treated them as their own library branches. 
+
+When processing the data from data.gov into r I began by reading each file and making the process of this easier by creating a function that could handle this faster. Once all the files have been read and I took a look at the data I realize that it would be tedious for each predictor to be output as their own data set. From here I began the process of compiling all the data for a given year into a table which led to the creation of the process_year_data function that would compile all the statistics into a single table with each predictor as its own column. This gave a really good output as the data can now be called however the caveat to this is that each library has a row every month of the year meaning that all 80 libraries now had 12 rows leading to each table for a given year having 960 different rows to examine. This was kept as this allows for an examination of extremes and other relevant data but in order to get a better overview the aggregate_year_data function was created to compile the data further by calculating the sum of all the statistics for a given library. With this now being completed it allowed for the data to finally be analyzed with greater ease and cleaner statistics.
+
+## Descriptive Analysis 
+By using this data we can examine trends in library usage but also the impact the pandemic had on the usage of library services overall. Specifically by looking at the data from 2019 to understand the statistics prior to the pandemic we can get a good idea of where library usage peaked. Considering that the pandemic was officially declared in 2020 the best data to look at for the immediate impact would be 2021 as the data for 2022 would be after some safety guidelines were lifted. Lastly to see the overall impact the pandemic has had a year after it was officially declared over the data from 2024 will be considered and compared along with that of 2019 and 2021.
+
+By using this data we can examine trends in library usage but also the impact the pandemic had on the usage of library services overall. Specifically by looking at the data from 2019 to understand the statistics prior to the pandemic we can get a good idea of where library usage peaked. Considering that the pandemic was officially declared in 2020 the best data to look at for the immediate impact would be 2021 as the data for 2022 would be after some safety guidelines were lifted. Lastly to see the overall impact the pandemic has had a year after it was officially declared over the data from 2024 will be considered and compared along with that of 2019 and 2021.
+
+By using this data we can examine trends in library usage but also the impact the pandemic had on the usage of library services overall. Specifically by looking at the data from 2019 to understand the statistics prior to the pandemic we can get a good idea of where library usage peaked. Considering that the pandemic was officially declared in 2020 the best data to look at for the immediate impact would be 2021 as the data for 2022 would be after some safety guidelines were lifted. Lastly to see the overall impact the pandemic has had a year after it was officially declared over the data from 2024 will be considered and compared along with that of 2019 and 2021.
+
+By using this data we can examine trends in library usage but also the impact the pandemic had on the usage of library services overall. Specifically by looking at the data from 2019 to understand the statistics prior to the pandemic we can get a good idea of where library usage peaked. Considering that the pandemic was officially declared in 2020 the best data to look at for the immediate impact would be 2021 as the data for 2022 would be after some safety guidelines were lifted. Lastly to see the overall impact the pandemic has had a year after it was officially declared over the data from 2024 will be considered and compared along with that of 2019 and 2021.
+
+## Appendix
+### I. Data Read      
+```{R}
+data_dir <- "LibraryData/"
+
+load_year_data <- function(year) 
+{
+  visitors_file <- paste0(data_dir, year, "Visitors.csv")
+  circ_file <- paste0(data_dir, year, "Circ.csv")
+  holds_file <- paste0(data_dir, year, "Holds.csv")
+  computer_file <- paste0(data_dir, year, "Computer.csv")
+
+  
+  visitors <- read_csv(visitors_file)
+  circ <- read_csv(circ_file)
+  holds <- read_csv(holds_file)
+  computer <- read_csv(computer_file)
+
+  return(list(visitors = visitors, circ = circ, holds = holds, computer = computer))
+}
+
+data_2019 <- load_year_data(2019)
+data_2021 <- load_year_data(2021)
+data_2024 <- load_year_data(2024)
+```
+    
+### II. Data Preparation      
+#### II.I. Data Processing      
+```{R}
+process_year_data <- function(year, data_list)
+{
+  visitors <- data_list$visitors
+  circ <- data_list$circ
+  holds <- data_list$holds
+  holds <- holds %>% mutate(across(c(-LOCATION), as.numeric))
+  computer <- data_list$computer
+  
+  visitors_long <- visitors %>% pivot_longer(cols = -LOCATION, names_to = "Month", values_to = "Visitation")
+  circ_long <- circ %>% pivot_longer(cols = -LOCATION, names_to = "Month", values_to = "Circulation")
+  holds_long <- holds %>% pivot_longer(cols = -LOCATION, names_to = "Month", values_to = "Holds")
+  computer_long <- computer %>% pivot_longer(cols = -LOCATION, names_to = "Month", values_to = "Sessions")
+  
+  month_order <- c("JANUARY", "FEBRUARY", "MARCH", "APRIL", "MAY", "JUNE", "JULY", "AUGUST", "SEPTEMBER", "OCTOBER", "NOVEMBER", "DECEMBER")
+  
+  visitors_long$Month <- factor(visitors_long$Month, levels = month_order)
+  circ_long$Month <- factor(circ_long$Month, levels = month_order)
+  holds_long$Month <- factor(holds_long$Month, levels = month_order)
+  computer_long$Month <- factor(computer_long$Month, levels = month_order)
+  
+  visitors_long$LOCATION <- str_trim(visitors_long$LOCATION)
+  circ_long$LOCATION <- str_trim(circ_long$LOCATION)
+  holds_long$LOCATION <- str_trim(holds_long$LOCATION)
+  computer_long$LOCATION <- str_trim(computer_long$LOCATION)
+  
+  merged_year_data <- visitors_long %>% 
+  left_join(circ_long, by = c("LOCATION", "Month")) %>%
+  left_join(holds_long, by = c("LOCATION", "Month")) %>%
+  left_join(computer_long, by = c("LOCATION", "Month"))
+
+  merged_year_data <- merged_year_data %>%
+  mutate(Year = year) %>%
+  select(LOCATION, Visitation, Circulation, Holds, Sessions, Month, Year)
+
+  return(merged_year_data)
+}
+
+processed_2019 <- process_year_data(2019, data_2019)
+processed_2021 <- process_year_data(2021, data_2021)
+processed_2024 <- process_year_data(2024, data_2024)
+```
+#### II.II. Data Aggregation      
+```{R}
+aggregate_year_data <- function(year, data_list) 
+{
+  visitors <- data_list$visitors
+  circ <- data_list$circ
+  holds <- data_list$holds
+  computer <- data_list$computer
+  
+  visitors_yearly <- visitors %>%
+  mutate(across(c(-LOCATION), as.numeric)) %>%
+  mutate(LOCATION = str_trim(LOCATION)) %>%
+  group_by(LOCATION) %>%
+  summarise(Visitation = sum(across(where(is.numeric)), na.rm = TRUE))
+  
+  circ_yearly <- circ %>%
+  mutate(across(c(-LOCATION), as.numeric)) %>%
+  mutate(LOCATION = str_trim(LOCATION)) %>%
+  group_by(LOCATION) %>%
+  summarise(Circulation = sum(across(where(is.numeric)), na.rm = TRUE))
+  
+  holds_yearly <- holds %>%
+  mutate(across(c(-LOCATION), as.numeric)) %>%
+  mutate(LOCATION = str_trim(LOCATION)) %>%
+  group_by(LOCATION) %>%
+  summarise(Holds = sum(across(where(is.numeric)), na.rm = TRUE))
+  
+  computer_yearly <- computer %>%
+  mutate(across(c(-LOCATION), as.numeric)) %>%
+  mutate(LOCATION = str_trim(LOCATION)) %>%
+  group_by(LOCATION) %>%
+  summarise(Sessions = sum(across(where(is.numeric)), na.rm = TRUE))
+  
+  merged_year_data <- visitors_yearly %>%
+  left_join(circ_yearly, by = "LOCATION") %>%
+  left_join(holds_yearly, by = "LOCATION") %>%
+  left_join(computer_yearly, by = "LOCATION")
+  
+  merged_year_data <- merged_year_data %>%
+  mutate(Year = year) %>%
+  select(LOCATION, Visitation, Circulation, Holds, Sessions, Year)
+  
+  return(merged_year_data)
+}
+
+aggregated_2019 <- aggregate_year_data(2019, data_2019)
+aggregated_2021 <- aggregate_year_data(2021, data_2021)
+aggregated_2024 <- aggregate_year_data(2024, data_2024)
+```
+### III. Descriptive analysis      
+#### III.I. Processed/Aggregated Data Table      
+    ```{R}
+    combined_data <- bind_rows(aggregated_2019, aggregated_2021, aggregated_2024)
+    kable(combined_data)
+    ```
+#### III.II. Data Summary      
+```{R}
+summary(aggregated_2019 %>% select(-LOCATION, -Year))
+summary(aggregated_2021 %>% select(-LOCATION, -Year))
+summary(aggregated_2024 %>% select(-LOCATION, -Year))
+```
+#### III.III. Data Visualization 
+##### III.III.I. Scatter Plots 
+```{R}
+options(scipen = 999)
+
+ggplot(aggregated_2019, aes(x = Visitation, y = Circulation)) + geom_point() + labs(title = "Visitation vs. Circulation (2019)", x = "Visitation", y = "Circulation")
+ggplot(aggregated_2021, aes(x = Visitation, y = Circulation)) + geom_point() + labs(title = "Visitation vs. Circulation (2021)", x = "Visitation", y = "Circulation")
+ggplot(aggregated_2024, aes(x = Visitation, y = Circulation)) + geom_point() + labs(title = "Visitation vs. Circulation (2024)", x = "Visitation", y = "Circulation")
+```
+  
+```{R}
+ggplot(aggregated_2019, aes(x = Visitation, y = Holds)) + geom_point() + labs(title = "Visitation vs. Holds (2019)", x = "Visitation", y = "Holds")
+ggplot(aggregated_2021, aes(x = Visitation, y = Holds)) + geom_point() + labs(title = "Visitation vs. Holds (2021)", x = "Visitation", y = "Holds")
+ggplot(aggregated_2024, aes(x = Visitation, y = Holds)) + geom_point() + labs(title = "Visitation vs. Holds (2024)", x = "Visitation", y = "Holds")
+```
+    
+```{R}
+ggplot(aggregated_2019, aes(x = Visitation, y = Sessions)) + geom_point() + labs(title = "Visitation vs. Computer Sessions (2019)", x = "Visitation", y = "Computer Sessions")
+ggplot(aggregated_2021, aes(x = Visitation, y = Sessions)) + geom_point() + labs(title = "Visitation vs. Computer Sessions (2021)", x = "Visitation", y = "Computer Sessions")
+ggplot(aggregated_2024, aes(x = Visitation, y = Sessions)) + geom_point() + labs(title = "Visitation vs. Computer Sessions (2024)", x = "Visitation", y = "Computer Sessions")
+```
+##### III.III.II. Bar Graphs 
+```{R}
+ggplot(aggregated_2019, aes(x = LOCATION, y = Visitation)) + geom_bar(stat = "identity") + labs(title = "Visitation by Library (2019)", x = "Library Location", y = "Visitation") + 
+theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5))
+
+ggplot(aggregated_2021, aes(x = LOCATION, y = Visitation)) + geom_bar(stat = "identity") + labs(title = "Visitation by Library (2021)", x = "Library Location", y = "Visitation") + 
+theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5))
+
+ggplot(aggregated_2024, aes(x = LOCATION, y = Visitation)) + geom_bar(stat = "identity") + labs(title = "Visitation by Library (2024)", x = "Library Location", y = "Visitation") + 
+theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5))
+```

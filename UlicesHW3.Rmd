@@ -1,0 +1,223 @@
+---
+title: "Chapter 3 HW"
+author: "Ulices Gonzalez"
+date: "March 6th, 2025"
+output:
+  word_document: default
+  pdf_document: default
+  html_document:
+    fig_height: 4
+    highlight: pygments
+    theme: spacelab
+---
+
+```{r setup, include=FALSE}
+# DO NOT ALTER CODE IN THIS CHUNK
+knitr::opts_chunk$set(echo = TRUE)
+library(dplyr)
+library(ggplot2)
+```
+
+* * *
+
+#### Exercise 1: Describe the null hypotheses to which the p-values given in Table 3.4 correspond. Explain what conclusions you can draw based on these p-values. Your explanation should be phrased in terms of sales, TV, radio, and newspaper, rather than in terms of the coeffcients of the linear model.
+
+Looking the values for TV it implies that the null hypothesis is that TV expenses has minimal to no impact on sales, the same can be said about the null hypothesis for Radio and Newspaper expenses. However looking at the p-values it suggests otherwise for the impact of TV and Radio as their p-values are small enough that the null can be rejected implying that these expenses play a role in  sales but the same cannot be said for Newspaper. Due to Newspaper having a significantly larger p-value the null cannot be rejected until more data is provided to determine if it truly does have an impact on sales.
+
+#### Exercise 3: Suppose we have a data set with five predictors, X1 = GPA, X2 = IQ, X3 = Level (1 for College and 0 for High School), X4 = Interaction between GPA and IQ, and X5 = Interaction between GPA and Level. The response is starting salary after graduation (in thousands of dollars). Suppose we use least squares to ft the model, and get βˆ0 = 50, βˆ1 = 20, βˆ2 = 0.07, βˆ3 = 35, βˆ4 = 0.01, βˆ5 = −10.
+
+(a) Which answer is correct, and why?
+
+Answer iii is correct, if we calculate salaries for both College and High School Graduates using a fixed values for GPA and IQ we can then find the difference in salaries by subtracting as shown below. This allows us to look at the interaction between GPA and Level which allows us to isolate the minimum GPA needed for High School Graduates to reach in order to earn equal if not more than College Graduates.
+      
+Salary = βˆ0 + (βˆ1 * X1) + (βˆ2 * X2) +(βˆ3 * X3) +(βˆ4 * X5) + (βˆ5 * X5) = 50 + 20X1 + 0.07X2 + 35X3 + 0.01X4 + (-10)X5  
+
+College Salary = 50 + 20X1 + 0.07X2 + 35 + 0.01(X1 * X2) + (-10)(X1 * 1) = 50 + 20X1 + 0.07X2 + 35 + 0.01(X1 * X2) + (-10)(X1)  
+
+High School Salary = 50 + 20X1 + 0.07X2 + 0.01(X1 * X2) + (-10)(X1 * 0) = 50 + 20X1 + 0.07X2 + 0.01(X1 * X2)  
+                   
+Difference => College Salary - High School Salary => 35 + (-10)(X1) = 0 => 10X1 = 35 => X1 = 3.5  
+
+Min GPA = 3.5 
+        
+(b) Predict the salary of a college graduate with IQ of 110 and a GPA of 4.0.
+  
+Predicted Salary = 50 + 20(4.0) + 0.07(110) + 35 + 0.01(4.0 * 110) + (-10)(4.0) = 50 + 80 + 7.7 + 35 + 4.4 + (-40) = 177.1 - 40 = 137.1  
+ 
+Predicted Salary = 137.1 (in thousands of dollars)  
+
+(c) True or false: Since the coefficient for the GPA/IQ interaction term is very small, there is very little evidence of an interaction effect. Justify your answer.
+
+False. While the coefficient may be small it still cannot be ruled out since other variables it interacts with can scale it to be significant. 
+
+* * *
+
+## Applied Questions
+
+#### Exercise 10: This question should be answered using the Carseats data set.
+
+  (a) Fit a multiple regression model to predict Sales using Price,
+  Urban, and US.
+  
+```{R}
+carSeats <- read.csv("DataSets/Carseats.csv")
+
+seatsFit <- lm(Sales ~ Price + Urban + US, data = carSeats)
+
+summary(seatsFit)
+```
+  
+  (b) Provide an interpretation of each coeffcient in the model. Be careful—some of the variables in the model are qualitative!
+
+Price - As prices increase the number of sales decrease, if we were to use the value of -0.054459 we could interpret this as for every dollar price increase sales drop by 0.054459.
+
+Urban - Sales are not affected by whether an area is Urban or not which is backed up by the p-value.
+
+US - Stores within the US sell more than stores outside of the US but it is not significant.
+  
+  (c) Write out the model in equation form, being careful to handle the qualitative variables properly
+  
+Sales = 13.043469 + (-0.054459)(Price) + (-0.021916)(Urban) + 1.200573(US)
+  
+  (d) For which of the predictors can you reject the null hypothesis H0 : βj = 0?
+  
+Price and US.
+  
+  (e) On the basis of your response to the previous question, fit a smaller model that only uses the predictors for which there is evidence of association with the outcome.
+  
+```{R}
+newSeatFit <- lm(carSeats$Sales ~ carSeats$Price + carSeats$US)
+
+summary(newSeatFit)
+```
+  
+  (f) How well do the models in (a) and (e) fit the data?
+
+Although both models show a similar if not the same amount of variance as they both show about 24% Variance. Both standard errors also are very close in value to one another which helps support that both models fit the data, however due to model e using less predictors it could be implied that it is the best fit.
+  
+  (g) Using the model from (e), obtain 95 % confdence intervals for the coeffcient(s).
+
+```{R}  
+  confint(newSeatFit)
+```
+  
+  (h) Is there evidence of outliers or high leverage observations in the model from (e)?
+  
+```{R}
+  par(mfrow = c(2,2))
+  plot(newSeatFit)
+```
+
+Using the plots above there is very little if any evidence present but if there was it would be nothing significant.
+
+#### Exercise 13: In this exercise you will create some simulated data and will ft simple linear regression models to it. Make sure to use set.seed(1) prior to starting part (a) to ensure consistent results.
+
+```{R}
+set.seed(1)
+```
+
+  (a) Using the rnorm() function, create a vector, x, containing 100 observations drawn from a N(0, 1) distribution. This represents feature, X.
+
+```{R}
+x <- rnorm(100, 0, 1)
+```
+  
+  (b) Using the rnorm() function, create a vector, eps, containing 100 observations drawn from a N(0, 0.25) distribution—a normal distribution with mean zero and variance 0.25.
+
+```{R}
+eps <- rnorm(100, 0, 0.25)
+```
+
+  (c) Using x and eps, generate a vector y according to the model Y = −1+0.5X + ϵ. (3.39) What is the length of the vector y? What are the values of β0 and β1 in this linear model?
+
+```{R}
+y <- (-1) + (0.5 * x) + eps
+length(y)
+```
+
+β0 = -1 and β1 = 0.5
+  
+  (d) Create a scatterplot displaying the relationship between x and y. Comment on what you observe.
+
+```{R}
+plot(x, y)
+```
+
+The relationship between x and y is mostly linear.
+  
+  (e) Fit a least squares linear model to predict y using x. Comment on the model obtained. How do βˆ0 and βˆ1 compare to β0 and β1?
+
+```{R}
+leastSqr <-  lm(y ~ x)
+summary(leastSqr)
+```
+
+βˆ0 and βˆ1 are extremely close to that of β0 and β1 with βˆ0 = -1.00942, βˆ1 = 0.49973, β0 = -1, and β1 = 0.5
+  
+  (f) Display the least squares line on the scatterplot obtained in (d). Draw the population regression line on the plot, in a diferent color. Use the legend() command to create an appropriate legend.
+
+```{R}
+plot(x, y)
+abline(leastSqr, col = "magenta")
+abline(-1, 0.5, col = "cyan")
+legend("bottomright", c("Least Squares", "Regression"), col = c("magenta", "cyan"), lty = c(1, 1))
+```
+  
+  (g) Now ft a polynomial regression model that predicts y using x and x2. Is there evidence that the quadratic term improves the model ft? Explain your answer.
+
+```{R}
+prMod <- lm(y ~ x + I(x^2))
+summary(prMod)
+```
+
+With the includion of x^2, there are no siginiciant improvements to the model besides the RSE an R^2 values.
+  
+  (h) Repeat (a)–(f) after modifying the data generation process in such a way that there is less noise in the data. The model (3.39) should remain the same. You can do this by decreasing the variance of the normal distribution used to generate the error term ϵ in (b). Describe your results.
+
+```{R}
+set.seed(1)
+x <- rnorm(100, 0, 1)
+eps <- rnorm(100, 0, 0.05)
+y <- (-1) + (0.5 * x) + eps
+
+plot(x, y)
+
+leastSqrLN <- lm(y ~ x)
+summary(leastSqrLN)
+
+abline(leastSqrLN, col = "magenta")
+abline(-1, 0.5, col = "cyan")
+legend("bottomright", c("Least Squares", "Regression"), col = c("magenta", "cyan"), lty = c(1, 1))
+```
+
+After adjusting the variance to reduce the noise we can see that the models are linear more clearly which has caused both plotted lines to lie more closely together, while the coefficients have not change significantly the RSE and R^2 have with RSE being lower and R^2 being higher.
+
+  (i) Repeat (a)–(f) after modifying the data generation process in such a way that there is more noise in the data. The model (3.39) should remain the same. You can do this by increasing the variance of the normal distribution used to generate the error term ϵ in (b). Describe your results.
+
+```{R}
+set.seed(1)
+x <- rnorm(100, 0, 1)
+eps <- rnorm(100, 0, 0.8)
+y <- (-1) + (0.5 * x) + eps
+
+plot(x, y)
+
+leastSqrMN <- lm(y ~ x)
+summary(leastSqrMN)
+
+abline(leastSqrMN, col = "magenta")
+abline(-1, 0.5, col = "cyan")
+legend("bottomright", c("Least Squares", "Regression"), col = c("magenta", "cyan"), lty = c(1, 1))
+```
+
+After adjusting the variance to increase the noise we can see the that the coefficients are still relatively close to the original but now the RSE has increased while the R^2 has decreased. The model is also no longer as linear due to the increase in noise.
+  
+  (j) What are the confidence intervals for β0 and β1 based on the original data set, the noisier data set, and the less noisy data set? Comment on your results.
+
+```{R}
+confint(leastSqr)
+confint(leastSqrLN)
+confint(leastSqrMN)
+```
+
+With the data above it is clear that there is a direct impact on confidence intervals when variance is adjust to increase/decrease noise. The second model with a reduced level of noise provides better confidence intervals as opposed to the third with an increased level of noise, with the original model lying between the others in terms of its confidence intervals.
