@@ -1,0 +1,330 @@
+---
+title: "Chapter 4 HW"
+author: "Ulices Gonzalez"
+date: "April 3rd, 2025"
+output:
+  word_document: default
+  html_document:
+    fig_height: 4
+    highlight: pygments
+    theme: spacelab
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+# DO NOT ALTER CODE IN THIS CHUNK
+knitr::opts_chunk$set(echo = TRUE)
+library(dplyr)
+library(ggplot2)
+```
+
+------------------------------------------------------------------------
+
+## Conceptual Questions
+
+### 3. This problem relates to the QDA model, in which the observations within each class are drawn from a normal distribution with a class specific mean vector and a class specific covariance matrix. We consider the simple case where p = 1; i.e. there is only one feature. Suppose that we have K classes, and that if an observation belongs to the kth class then X comes from a one-dimensional normal distribution, X ∼ N((µ)k, (σ\^2)k). Recall that the density function for the one-dimensional normal distribution is given in (4.16). Prove that in this case, the Bayes classifier is not linear. Argue that it is in fact quadratic.
+
+### Hint: For this problem, you should follow the arguments laid out in Section 4.4.1, but without making the assumption that (σ\^2)1 = ... = (σ\^2)K.
+
+To prove this we would need to use the normal distribution for class k below
+
+$$
+f_k(x) = \frac{1}{\sqrt{2\pi\sigma_k^2}} \exp\left(-\frac{(x - \mu_k)^2}{2\sigma_k^2} \right).
+$$
+
+which if applied similarly to section 4.4.1 we can find the poster probability using Bayes Theorem
+$$
+p_k(x) = \frac{\pi_k \frac{1}{\sqrt{2\pi\sigma_k^2}} \exp\left(-\frac{(x - \mu_k)^2}{2\sigma_k^2} \right)}
+{\sum_{l=1}^{k} \pi_l \frac{1}{\sqrt{2\pi\sigma_l^2}} \exp\left(-\frac{(x - \mu_l)^2}{2\sigma_l^2} \right)}
+$$
+
+from here we can then apply log onto both sides and then simplify
+
+$$
+log(p_k(x)) = log(\frac{\pi_k \frac{1}{\sqrt{2\pi\sigma_k^2}} \exp\left(-\frac{(x - \mu_k)^2}{2\sigma_k^2} \right)}
+{\sum_{l=1}^{k} \pi_l \frac{1}{\sqrt{2\pi\sigma_l^2}} \exp\left(-\frac{(x - \mu_l)^2}{2\sigma_l^2} \right)})
+$$
+
+to get the following
+
+$$
+\delta_k(x) = \log(\pi_k) - \log(\sigma_k) - \frac{\mu_k^2}{2\sigma_k^2} + x\frac{ \mu_k}{\sigma_k^2} - \frac{x^2}{2\sigma_k^2}
+$$
+
+since x is never factored out of the function and leads to it become a quadratic expression and due to a value of x then being applied an exponential value with x\^2 it also leads to the function being non linear.
+
+### 6. Suppose we collect data for a group of students in a statistics class with variables X1 = hours studied, X2 = undergrad GPA, and Y = receive an A. We ft a logistic regression and produce estimated coefficient, (β)0 = −6, (β)1 = 0.05, (β)2 = 1.
+
+#### (a) Estimate the probability that a student who studies for 40 h and has an undergrad GPA of 3.5 gets an A in the class.
+
+$$
+P(Y = 1) = \frac{1}{1 + e^{-(-6 + (0.05*40) + (1*3.5))}}
+$$ $$
+\ -6 + (0.05*40) + (1*3.5) = -6 + 2 + 3.5 = -0.5
+$$
+
+$$
+P(Y = 1) = \frac{1}{1 + e^{-(-0.5)}}
+$$ $$
+P(Y = 1) = \frac{1}{1 + e^{0.5}} = \frac{1}{1 + 1.64872} \approx \frac{1}{2.64872} \approx 0.3775
+$$
+
+#### (b) How many hours would the student in part (a) need to study to have a 50 % chance of getting an A in the class?
+
+$$
+\ -6 + (0.05*hours) + (1*3.5) => -6 + 0.05hours + 3.5
+$$ $$
+\ => -2.5 + 0.05hours = 0 => 0.05hours = 2.5
+$$ $$
+\ => \frac{0.05hours}{0.05} = \frac{2.5}{0.05}
+$$
+
+$$
+\ => hours = 50
+$$
+
+------------------------------------------------------------------------
+
+## Applied Questions
+
+### 13. This question should be answered using the Weekly data set, which is part of the ISLR2 package. This data is similar in nature to the Smarket data from this chapter’s lab, except that it contains 1,089 weekly returns for 21 years, from the beginning of 1990 to the end of 2010.
+
+#### (a) Produce some numerical and graphical summaries of the Weekly data. Do there appear to be any patterns?
+
+```{R}
+library(ISLR2)
+summary(Weekly)
+cor(Weekly[, sapply(Weekly, is.numeric)])
+pairs(Weekly)
+```
+
+There are more shares being traded as years go by which is shown in both scatter plots that depict this while the rest of the plots are for the most part the same.
+
+#### (b) Use the full data set to perform a logistic regression with Direction as the response and the five lag variables plus Volume as predictors. Use the summary function to print the results. Do any of the predictors appear to be statistically significant? If so, which ones?
+
+```{R}
+fittedWeekly <- glm(Direction ~ Lag1 + Lag2 + Lag3 + Lag4 + Lag5 + Volume, data = Weekly, family = "binomial")
+summary(fittedWeekly)
+```
+
+Lag2 is statistically significant compared to the rest of the predictors which lack any significance in comparison.
+
+#### (c) Compute the confusion matrix and overall fraction of correct predictions. Explain what the confusion matrix is telling you about the types of mistakes made by logistic regression.
+
+```{R}
+probability <- predict(fittedWeekly, type = "response")
+prediction <- rep("Down", 1089)
+prediction[probability > 0.5] = "Up"
+table(prediction, Weekly$Direction)
+```
+
+Based on the result of confusion matrix above the model is able to predict market trends as they move upward but is not as efficient in predicting when they move downward. This can be looked at further when we take the resulting values specifically our True Positive and Negatives and dividing their sum by the total returns which would result in
+
+$$
+\ 557+54 = 611 => \frac{611}{1089} \approx 0.561
+$$
+
+or roughly 56% of predictions being correct. To gather the accuracy of predicting either trend we can use the following
+
+$$
+\ \frac{54}{54 + 430} => \frac{54}{484} \approx 0.1115
+$$
+
+which is roughly 11.2% of predictions downward being accurate and for upward predictions we can use
+
+$$
+\ \frac{557}{557+ 48} => \frac{557}{605} \approx 0.9206
+$$
+
+or roughly 92.1% of predictions upward being accurate.
+
+#### (d) Now fit the logistic regression model using a training data period from 1990 to 2008, with Lag2 as the only predictor. Compute the confusion matrix and the overall fraction of correct predictions for the held out data (that is, the data from 2009 and 2010).
+
+```{R}
+trainingYears <- Weekly$Year < 2009
+trainingData <- Weekly[trainingYears, ]
+testData <- Weekly[!trainingYears, ]
+logRegModel <- glm(Direction ~ Lag2, data = trainingData, family = "binomial")
+testProbability <- predict(logRegModel, testData, type = "response")
+testPrediction <- ifelse(testProbability > 0.5, "Up", "Down")
+table(Predicted = testPrediction, Actual = testData$Direction)
+accuracy <- mean(testPrediction == testData$Direction)
+print(paste("Model Accuracy:", accuracy))
+```
+
+#### (e) Repeat (d) using LDA.
+
+```{R}
+library(MASS)
+ldaModel <- lda(Direction ~ Lag2, data = trainingData)
+ldaPrediction <- predict(ldaModel, testData)$class
+table(Predicted = ldaPrediction, Actual = testData$Direction)
+accuracy <- mean(ldaPrediction == testData$Direction)
+print(paste("Model Accuracy:", accuracy))
+```
+
+#### (f) Repeat (d) using QDA.
+
+```{R}
+qdaModel <- qda(Direction ~ Lag2, data = trainingData)
+qdaPrediction <- predict(qdaModel, testData)$class
+table(Predicted = qdaPrediction, Actual = testData$Direction)
+accuracy <- mean(qdaPrediction == testData$Direction)
+print(paste("Model Accuracy:", accuracy))
+```
+
+#### (g) Repeat (d) using KNN with K = 1.
+
+```{R}
+library(class)
+trainingX <- trainingData$Lag2
+trainingY <- trainingData$Direction
+testX <- testData$Lag2
+knnPrediction <- knn(train = matrix(trainingX), test = matrix(testX), cl = trainingY, k = 1)
+table(Predicted = knnPrediction, Actual = testData$Direction)
+accuracy <- mean(knnPrediction == testData$Direction)
+print(paste("Model Accuracy:", accuracy))
+```
+
+#### (h) Repeat (d) using naive Bayes.
+
+```{R}
+library(e1071)
+naiveModel <- naiveBayes(Direction ~ Lag2, data = trainingData)
+naivePrediction <- predict(naiveModel, testData)
+table(Predicted = naivePrediction, Actual = testData$Direction)
+accuracy <- mean(naivePrediction == testData$Direction)
+print(paste("Model Accuracy:", accuracy))
+```
+
+#### (i) Which of these methods appears to provide the best results on this data?
+
+Both the Logistic Regression model and LDA model share an accuracy of 0.625 or 62.5% which compared to the rest of the models are the highest in accuracy. However it is important to mention that both share the same issue found in part (c) which is the fact both while predicting upward market trends accurately both do a poor job predicting downward trends.
+
+#### (j) Experiment with different combinations of predictors, including possible transformations and interactions, for each of the methods. Report the variables, method, and associated confusion matrix that appears to provide the best results on the held out data. Note that you should also experiment with values for K in the KNN classifier.
+
+```{R}
+knnModel <- function(data, predictorVar, responseVar, portion = 0.95, kVal) 
+{
+  set.seed(1)  
+  trainIndex <- sample(1:nrow(data), portion * nrow(data))
+  trainingData <- data[trainIndex, ]
+  testData <- data[-trainIndex, ]
+  
+  trainingX <- trainingData[, predictorVar, drop = FALSE]
+  trainingY <- trainingData[[responseVar]]
+  testX <- testData[, predictorVar, drop = FALSE]
+  
+  knnPrediction <- knn(train = as.matrix(trainingX), test = as.matrix(testX), cl = trainingY, k = kVal)
+  
+  confusionMatrix <- table(Predicted = knnPrediction, Actual = testData[[responseVar]])
+  
+  modelAccuracy <- mean(knnPrediction == testData[[responseVar]])
+  
+  return(list(confusion_matrix = confusionMatrix, accuracy = modelAccuracy))
+}
+
+results <- knnModel(data = Weekly, predictorVar = "Lag4", responseVar = "Direction", portion = 0.8, kVal = 5)
+
+print(results$confusion_matrix)
+print(paste("Model Accuracy 1:", results$accuracy))
+
+results <- knnModel(data = Weekly, predictorVar = c("Lag2", "Lag5"), responseVar = "Direction", portion = 0.75, kVal = 10)
+
+print(results$confusion_matrix)
+print(paste("Model Accuracy 2:", results$accuracy))
+
+results <- knnModel(data = Weekly, predictorVar = c("Lag1", "Lag3"), responseVar = "Direction", portion = 0.5, kVal = 25)
+
+print(results$confusion_matrix)
+print(paste("Model Accuracy 3:", results$accuracy))
+
+results <- knnModel(data = Weekly, predictorVar = c("Lag1", "Lag5"), responseVar = "Direction", portion = 0.25, kVal = 50)
+
+print(results$confusion_matrix)
+print(paste("Model Accuracy 4:", results$accuracy))
+
+results <- knnModel(data = Weekly, predictorVar = c("Lag2", "Lag3", "Lag4"), responseVar = "Direction", portion = 0.20, kVal = 75)
+
+print(results$confusion_matrix)
+print(paste("Model Accuracy 5:", results$accuracy))
+
+```
+
+Of all the models I created above through experimenting with different values after creating my KNN function Model 2 had the best results.
+
+### 15. This problem involves writing functions.
+
+#### (a) Write a function, Power(), that prints out the result of raising 2 to the 3rd power. In other words, your function should compute 2\^3 and print out the results. Hint: Recall that x\^a raises x to the power a. Use the print() function to output the result.
+
+```{R}
+Power <- function()
+{
+  print(2^3)
+}
+```
+
+#### (b) Create a new function, Power2(), that allows you to pass any two numbers, x and a, and prints out the value of x\^a. You can do this by beginning your function with the line
+
+#### Power2 \<- function(x, a) {
+
+#### You should be able to call your function by entering, for instance,
+
+#### Power2(3, 8)
+
+#### on the command line. This should output the value of 3\^8, namely, 6,561.
+
+```{R}
+Power2 <- function(x, a)
+{
+  print(x^a)
+}
+```
+
+#### (c) Using the Power2() function that you just wrote, compute 10\^3, 8\^17, and 131\^3.
+
+```{R}
+Power2(10, 3)
+Power2(8, 17)
+Power2(131, 3)
+```
+
+#### (d) Now create a new function, Power3(), that actually returns the result x\^a as an R object, rather than simply printing it to the screen. That is, if you store the value x\^a in an object called result within your function, then you can simply return() this return() result, using the following line:
+
+#### return(result)
+
+#### The line above should be the last line in your function, before the } symbol.
+
+```{R}
+Power3 <- function(x, a)
+{
+  result <- x^a
+  return(result)
+}
+```
+
+#### (e) Now using the Power3() function, create a plot of f(x) = x\^2. The x-axis should display a range of integers from 1 to 10, and the y-axis should display x\^2. Label the axes appropriately, and use an appropriate title for the figure. Consider displaying either the x-axis, the y-axis, or both on the log-scale. You can do this by using log = "x", log = "y", or log = "xy" as arguments to the plot() function.
+
+```{R}
+xvals <- 1:10
+yvals <- Power3(xvals, 2)
+plot(xvals, yvals, col="red", xlab="x", ylab="f(x) = x^2", main="Plot of f(x) = x^2 (log x)", log="x")
+plot(xvals, yvals, col="red", xlab="x", ylab="f(x) = x^2", main="Plot of f(x) = x^2 (log x)", log="xy")
+plot(xvals, yvals, col="red", xlab="x", ylab="f(x) = x^2", main="Plot of f(x) = x^2 (log x)", log="y")
+```
+
+#### (f) Create a function, PlotPower(), that allows you to create a plot of x against x\^a for a fixed a and for a range of values of x. For instance, if you call
+
+#### PlotPower(1:10, 3)
+
+#### then a plot should be created with an x-axis taking on values 1, 2,..., 10, and a y-axis taking on values 1\^3, 2\^3,..., 10\^3.
+
+```{R}
+PlotPower <- function(x, a)
+{
+  yvals <- Power3(x, a)
+  plot(x, yvals, col="red", xlab="x", ylab=paste("x^", a, sep=""), main=paste("Plot of x^", a, sep=""))
+}
+
+PlotPower(1:10, 3)
+```
