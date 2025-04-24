@@ -15,11 +15,14 @@ output:
 knitr::opts_chunk$set(echo = TRUE)
 library(dplyr)
 library(ggplot2)
+library(glmnet)
 library(tidyverse)
 library(lubridate)
 library(DT)
 library(knitr)
 library(heatmaply)
+library(lmtest)
+library(sandwich)
 ```
 
 ------------------------------------------------------------------------
@@ -46,15 +49,29 @@ When processing the data from data.gov into r I began by reading each file and m
 
 ## Descriptive Analysis
 
-Above are the summaries of the data for 2019, 2021, and 2024 which display some relevant data regarding the use of public libraries within the city of Chicago. It’s important to state that the minimum values that are 0 correspond to the closure of a branch during a given month, these values were still included as the library branches would still be used during other times of the year. Considering that the data from 2021 is from during the pandemic, it goes without question that the lower number across all predictors corresponds to the impact that the pandemic had. However, it is notable that even a year after the end of the pandemic the average for all four predictors is much closer to that of the pandemic data. Specifically, if we look at the Mean visitation from 2021 it is under half of what the Median was in 2019, in 2024 while still higher by 25000 it shows that while library visitation is slowly coming back that the pandemic is having a long-lasting impact on the use of libraries throughout the city. However, circulation has remained consistent throughout 2021 – 2024 if we look at the means, Holds and Computer Sessions dropped during the pandemic but are showing signs of recovery with holds being slightly above what was reported in 2019 however the same cannot be said for Computer Sessions as they are still slowly increasing but are still below that of 2019.
+Above are the summaries of the data for 2019, 2021, and 2024 which display some relevant data regarding the use of public libraries within the city of Chicago. It’s important to state that the minimum values that are 0 correspond to the closure of a branch during a given month, these values were still included as the library branches would still be used during other times of the year. Considering that the data from 2021 is from during the pandemic, it goes without question that the lower number across all predictors corresponds to the impact that the pandemic had. However, it is notable that even a year after the end of the pandemic the average for all four predictors is much closer to that of the pandemic data. Specifically, if we look at the Mean visitation from 2021 it is under half of what the Median was in 2019, in 2024 while still higher by 25000 it shows that while library visitation is slowly coming back that the pandemic is having a long-lasting impact on the use of libraries throughout the city. However, circulation has remained consistent throughout 2021 – 2024 if we look at the means, Holds and Computer Sessions dropped during the pandemic but are showing signs of recovery with holds being slightly above what was reported in 2019 however the same cannot be said for Computer Sessions as they are still slowly increasing but are still below that of 2019. (Obvious outliers are not being considered in this analysis)
 
-Over the course of the 5 years being examined there has been a clear change in the scale of visitation throughout the libraries of Chicago. If we excluded the obvious outliers of the Harold Washington and Sulzer Regional Branches, visitation throughout branches was between 100000 to 300000 in 2019. However, if we look at 2021 it’s not surprising that with safety guidelines visitation would go down between 20000 to 100000. Since then, it has steadily grown with it reaching between 50000 to 175000 in visitation but is a significant decrease from what it once was in 2019.
+Over the course of the 5 years being examined there has been a clear change in the scale of visitation throughout the libraries of Chicago. If we excluded the obvious outliers of the Harold Washington and Sulzer Regional Branches, visitation throughout branches was between 100000 to 300000 in 2019. However, if we look at 2021 it’s not surprising that with safety guidelines visitation would go down between 20000 to 100000. Since then, it has steadily grown with it reaching between 50000 to 175000 in visitation but is a significant decrease from what it once was in 2019. (Obvious outliers are not being considered in this analysis)
 
 In 2019 both visitation and circulation were consistent with them having a close relationship with one another. Moving into 2021 there is more variance in the relationship as it seems there was an increase in circulation but decrease in visitation, but it is important to note that this is also at a smaller scale compared to 2019. In 2024 there is an increase in both circulation and visitation, however the relationship is even more spread out than it was during the pandemic with a closer relationship being seen with smaller numbers in both ends. Although both have gone up it is still clear that it is at a smaller scale than in 2019 and only slightly larger than that of 2021. (Obvious outliers are not being considered in this analysis)
 
 When looking at the relationship between holds and visitation it has the largest changes between the three being examined as in 2019 there was consistency in the number of holds increasing as there was less visitation which when compared to 2021 is very similar albeit at a smaller scale and more variability. However, the relationship has gone through a major change in 2024 with the increase in visitation leading to a much closer relationship between holds and visitation with it also being more consistent and even at a slightly larger scale than in 2019. (Obvious outliers are not being considered in this analysis)
 
-Lastly Computer Sessions in 2019 had a clear relationship with visitation, with it being extremely consistent with one another with very few changes. In 2021, however, it is expected that this would become more varied throughout the pandemic along with it going down in scale. Of the three years being examined though, 2024 seems to show the largest change in variance as there is more inconsistency in the relationship between sessions and visitation. It also shows some signs of growth but is closer to that of what was reported in 2021.
+Lastly Computer Sessions in 2019 had a clear relationship with visitation, with it being extremely consistent with one another with very few changes. In 2021, however, it is expected that this would become more varied throughout the pandemic along with it going down in scale. Of the three years being examined though, 2024 seems to show the largest change in variance as there is more inconsistency in the relationship between sessions and visitation. It also shows some signs of growth but is closer to that of what was reported in 2021. (Obvious outliers are not being considered in this analysis)
+
+## Multiple Linear Regression Model
+
+### Description in 1-2 paragraphs
+
+## Polynomial Regression Model
+
+### Description in 1-2 paragraphs
+
+## Ridge Regression Model
+
+### Description in 1-2 paragraphs
+
+## Model Comparisons
 
 ## Appendix
 
@@ -206,21 +223,21 @@ summary(aggregated_2024 %>% select(-LOCATION, -Year))
 ```{R}
 options(scipen = 999)
 
-ggplot(aggregated_2019, aes(x = Visitation, y = Circulation)) + geom_point() + labs(title = "Visitation vs. Circulation (2019)", x = "Visitation", y = "Circulation")
-ggplot(aggregated_2021, aes(x = Visitation, y = Circulation)) + geom_point() + labs(title = "Visitation vs. Circulation (2021)", x = "Visitation", y = "Circulation")
-ggplot(aggregated_2024, aes(x = Visitation, y = Circulation)) + geom_point() + labs(title = "Visitation vs. Circulation (2024)", x = "Visitation", y = "Circulation")
+ggplot(aggregated_2019, aes(x= Circulation, y = Visitation)) + geom_point() + labs(title = "Visitation vs. Circulation (2019)", x = "Circulation", y = "Visitation")
+ggplot(aggregated_2021, aes(x= Circulation, y = Visitation)) + geom_point() + labs(title = "Visitation vs. Circulation (2021)", x = "Circulation", y = "Visitation")
+ggplot(aggregated_2024, aes(x= Circulation, y = Visitation)) + geom_point() + labs(title = "Visitation vs. Circulation (2024)", x = "Circulation", y = "Visitation")
 ```
 
 ```{R}
-ggplot(aggregated_2019, aes(x = Visitation, y = Holds)) + geom_point() + labs(title = "Visitation vs. Holds (2019)", x = "Visitation", y = "Holds")
-ggplot(aggregated_2021, aes(x = Visitation, y = Holds)) + geom_point() + labs(title = "Visitation vs. Holds (2021)", x = "Visitation", y = "Holds")
-ggplot(aggregated_2024, aes(x = Visitation, y = Holds)) + geom_point() + labs(title = "Visitation vs. Holds (2024)", x = "Visitation", y = "Holds")
+ggplot(aggregated_2019, aes(x= Holds, y = Visitation)) + geom_point() + labs(title = "Visitation vs. Holds (2019)", x = "Holds", y = "Visitation")
+ggplot(aggregated_2021, aes(x= Holds, y = Visitation)) + geom_point() + labs(title = "Visitation vs. Holds (2021)", x = "Holds", y = "Visitation")
+ggplot(aggregated_2024, aes(x= Holds, y = Visitation)) + geom_point() + labs(title = "Visitation vs. Holds (2024)", x = "Holds", y = "Visitation")
 ```
 
 ```{R}
-ggplot(aggregated_2019, aes(x = Visitation, y = Sessions)) + geom_point() + labs(title = "Visitation vs. Computer Sessions (2019)", x = "Visitation", y = "Computer Sessions")
-ggplot(aggregated_2021, aes(x = Visitation, y = Sessions)) + geom_point() + labs(title = "Visitation vs. Computer Sessions (2021)", x = "Visitation", y = "Computer Sessions")
-ggplot(aggregated_2024, aes(x = Visitation, y = Sessions)) + geom_point() + labs(title = "Visitation vs. Computer Sessions (2024)", x = "Visitation", y = "Computer Sessions")
+ggplot(aggregated_2019, aes(x= Sessions, y = Visitation)) + geom_point() + labs(title = "Visitation vs. Sessions (2019)", x = "Sessions", y = "Visitation")
+ggplot(aggregated_2021, aes(x= Sessions, y = Visitation)) + geom_point() + labs(title = "Visitation vs. Sessions (2021)", x = "Sessions", y = "Visitation")
+ggplot(aggregated_2024, aes(x= Sessions, y = Visitation)) + geom_point() + labs(title = "Visitation vs. Sessions (2024)", x = "Sessions", y = "Visitation")
 ```
 
 ##### III.III.II. Bar Graphs
@@ -238,16 +255,173 @@ theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5))
 
 ### IV. Regression Methods Applied
 
-#### IV.I. Linear Regression
+#### IV.I. Simple Linear Regression
+```{R}
+sLm2019Circ <- lm(Visitation ~ Circulation, data = aggregated_2019)
+sLm2019Holds <- lm(Visitation ~ Holds, data = aggregated_2019)
+sLm2019Sess <- lm(Visitation ~ Sessions, data = aggregated_2019)
 
-##### IV.I.I. Description in 1-2 paragraphs
+sLm2021Circ <- lm(Visitation ~ Circulation, data = aggregated_2021)
+sLm2021Holds <- lm(Visitation ~ Holds, data = aggregated_2021)
+sLm2021Sess <- lm(Visitation ~ Sessions, data = aggregated_2021)
 
-#### IV.II. Polynomial Regression
+sLm2024Circ <- lm(Visitation ~ Circulation, data = aggregated_2024)
+sLm2024Holds <- lm(Visitation ~ Holds, data = aggregated_2024)
+sLm2024Sess <- lm(Visitation ~ Sessions, data = aggregated_2024)
+```
 
-##### IV.II.I. Description in 1-2 paragraphs
+##### IV.I.I. 2019
 
-#### IV.III. Ridge Regression
+```{R}
+summary(lm2019)
 
-##### IV.III.I. Description in 1-2 paragraphs
+options(scipen = 999)
 
-### V. Regression Comparisons
+ggplot(aggregated_2019, aes(x= Circulation, y = Visitation)) + geom_point() + geom_smooth(method = "lm", formula = y ~ x, se = FALSE, color = "magenta") + labs(title = "Visitation vs. Circulation (2019)", x = "Circulation", y = "Visitation")
+ggplot(aggregated_2019, aes(x= Holds, y = Visitation)) + geom_point() + geom_smooth(method = "lm", formula = y ~ x, se = FALSE, color = "magenta") + labs(title = "Visitation vs. Holds (2019)", x = "Holds", y = "Visitation")
+ggplot(aggregated_2019, aes(x= Sessions, y = Visitation)) + geom_point() + geom_smooth(method = "lm", formula = y ~ x, se = FALSE, color = "magenta") + labs(title = "Visitation vs. Sessions (2019)", x = "Sessions", y = "Visitation")
+```
+
+##### IV.I.II. 2021
+
+```{R}
+sLm2021 <- lm(Visitation ~ Circulation + Holds + Sessions, data = aggregated_2021)
+
+summary(lm2021)
+
+par(mfrow = c(2, 2))
+plot(lm2021)
+par(mfrow = c(1, 1))
+
+ggplot(aggregated_2021, aes(x= Circulation, y = Visitation)) + geom_point() + geom_smooth(method = "lm", formula = y ~ x, se = FALSE, color = "magenta") + labs(title = "Visitation vs. Circulation (2021)", x = "Circulation", y = "Visitation")
+ggplot(aggregated_2021, aes(x= Holds, y = Visitation)) + geom_point() + geom_smooth(method = "lm", formula = y ~ x, se = FALSE, color = "magenta") + labs(title = "Visitation vs. Holds (2021)", x = "Holds", y = "Visitation")
+ggplot(aggregated_2021, aes(x= Sessions, y = Visitation)) + geom_point() + geom_smooth(method = "lm", formula = y ~ x, se = FALSE, color = "magenta") + labs(title = "Visitation vs. Sessions (2021)", x = "Sessions", y = "Visitation")
+```
+
+##### IV.I.III. 2024
+
+```{R}
+sLm2024 <- lm(Visitation ~ Circulation + Holds + Sessions, data = aggregated_2024)
+
+summary(lm2024)
+
+ggplot(aggregated_2024, aes(x= Circulation, y = Visitation)) + geom_point() + geom_smooth(method = "lm", formula = y ~ x, se = FALSE, color = "magenta") + labs(title = "Visitation vs. Circulation (2024)", x = "Circulation", y = "Visitation")
+ggplot(aggregated_2024, aes(x= Holds, y = Visitation)) + geom_point() + geom_smooth(method = "lm", formula = y ~ x, se = FALSE, color = "magenta") + labs(title = "Visitation vs. Holds (2024)", x = "Holds", y = "Visitation")
+ggplot(aggregated_2024, aes(x= Sessions, y = Visitation)) + geom_point() + geom_smooth(method = "lm", formula = y ~ x, se = FALSE, color = "magenta") + labs(title = "Visitation vs. Sessions (2024)", x = "Sessions", y = "Visitation")
+```
+
+#### IV.I. Multiple Linear Regression
+```{R}
+mLm2019 <- lm(Visitation ~ Circulation + Holds + Sessions, data = aggregated_2019)
+mLm2021 <- lm(Visitation ~ Circulation + Holds + Sessions, data = aggregated_2021)
+mLm2024 <- lm(Visitation ~ Circulation + Holds + Sessions, data = aggregated_2024)
+```
+
+##### IV.I.I. 2019
+
+```{R}
+summary(mLm2019)
+
+par(mfrow = c(2, 2))
+plot(mLm2019)
+par(mfrow = c(1, 1))
+
+options(scipen = 999)
+
+predicted2019 <- predict(mLm2019, newdata = aggregated_2019)
+
+plotted2019Circ <- data.frame(Circulation = aggregated_2019$Circulation, Predicted_Visitation = predicted2019)
+plotted2019Circ <- plotted2019Circ %>% arrange(Circulation)
+
+ggplot(aggregated_2019, aes(x = Circulation, y = Visitation)) + geom_point() + geom_line(data = plotted2019Circ, aes(y = Predicted_Visitation), color = "magenta", linewidth = 1) + labs(title = "Visitation vs. Circulation (2019)", x = "Circulation", y = "Visitation (Observed vs. Predicted)")
+
+plotted2019Holds <- data.frame(Holds = aggregated_2019$Holds, Predicted_Visitation = predicted2019)
+plotted2019Holds <- plotted2019Holds %>% arrange(Holds)
+
+ggplot(aggregated_2019, aes(x = Holds, y = Visitation)) + geom_point() + geom_line(data = plotted2019Holds, aes(y = Predicted_Visitation), color = "magenta", linewidth = 1) + labs(title = "Visitation vs. Holds (2019)", x = "Holds", y = "Visitation (Observed vs. Predicted)")
+
+plotted2019Sess <- data.frame(Sessions = aggregated_2019$Sessions, Predicted_Visitation = predicted2019)
+plotted2019Sess <- plotted2019Sess %>% arrange(Sessions)
+
+ggplot(aggregated_2019, aes(x = Sessions, y = Visitation)) + geom_point() + geom_line(data = plotted2019Circ, aes(y = Predicted_Visitation), color = "magenta", linewidth = 1) + labs(title = "Visitation vs. Computer Sessions (2019)", x = "Circulation", y = "Visitation (Observed vs. Predicted)")
+```
+
+##### IV.I.II. 2021
+
+```{R}
+summary(mLm2021)
+
+par(mfrow = c(2, 2))
+plot(mLm2021)
+par(mfrow = c(1, 1))
+
+ggplot(aggregated_2021, aes(x= Circulation, y = Visitation)) + geom_point() + geom_smooth(method = "lm", formula = y ~ x, se = FALSE, color = "magenta") + labs(title = "Visitation vs. Circulation (2021)", x = "Circulation", y = "Visitation")
+ggplot(aggregated_2021, aes(x= Holds, y = Visitation)) + geom_point() + geom_smooth(method = "lm", formula = y ~ x, se = FALSE, color = "magenta") + labs(title = "Visitation vs. Holds (2021)", x = "Holds", y = "Visitation")
+ggplot(aggregated_2021, aes(x= Sessions, y = Visitation)) + geom_point() + geom_smooth(method = "lm", formula = y ~ x, se = FALSE, color = "magenta") + labs(title = "Visitation vs. Sessions (2021)", x = "Sessions", y = "Visitation")
+```
+
+##### IV.I.III. 2024
+
+```{R}
+summary(mLm2024)
+
+par(mfrow = c(2, 2))
+plot(mLm2024)
+par(mfrow = c(1, 1))
+
+ggplot(aggregated_2024, aes(x= Circulation, y = Visitation)) + geom_point() + geom_smooth(method = "lm", formula = y ~ x, se = FALSE, color = "magenta") + labs(title = "Visitation vs. Circulation (2024)", x = "Circulation", y = "Visitation")
+ggplot(aggregated_2024, aes(x= Holds, y = Visitation)) + geom_point() + geom_smooth(method = "lm", formula = y ~ x, se = FALSE, color = "magenta") + labs(title = "Visitation vs. Holds (2024)", x = "Holds", y = "Visitation")
+ggplot(aggregated_2024, aes(x= Sessions, y = Visitation)) + geom_point() + geom_smooth(method = "lm", formula = y ~ x, se = FALSE, color = "magenta") + labs(title = "Visitation vs. Sessions (2024)", x = "Sessions", y = "Visitation")
+```
+
+#### IV.III. Polynomial Regression
+
+```{R}
+pm2019 <- lm(Visitation ~ Circulation + I(Circulation^2) + Holds + I(Holds^2) + Sessions + I(Sessions^2), data = aggregated_2019)
+pm2021 <- lm(Visitation ~ Circulation + I(Circulation^2) + Holds + I(Holds^2) + Sessions + I(Sessions^2), data = aggregated_2021)
+pm2024 <- lm(Visitation ~ Circulation + I(Circulation^2) + Holds + I(Holds^2) + Sessions + I(Sessions^2), data = aggregated_2024)
+```
+
+##### IV.III.I. 2019
+
+```{R}
+summary(pm2019)
+
+par(mfrow = c(2, 2))
+plot(pm2019)
+par(mfrow = c(1, 1))
+
+options(scipen = 999)
+
+ggplot(aggregated_2019, aes(x= Circulation, y = Visitation)) + geom_point() + geom_smooth(method = "lm", formula = y ~ poly(x, 2), se = FALSE, color = "magenta") + labs(title = "Visitation vs. Circulation (2019)", x = "Circulation", y = "Visitation")
+ggplot(aggregated_2019, aes(x= Holds, y = Visitation)) + geom_point() + geom_smooth(method = "lm", formula = y ~ poly(x, 2), se = FALSE, color = "magenta") + labs(title = "Visitation vs. Holds (2021)", x = "Holds", y = "Visitation")
+ggplot(aggregated_2019, aes(x= Sessions, y = Visitation)) + geom_point() + geom_smooth(method = "lm", formula = y ~ poly(x, 2), se = FALSE, color = "magenta") + labs(title = "Visitation vs. Sessions (2024)", x = "Sessions", y = "Visitation")
+```
+
+##### IV.III.II. 2021
+
+```{R}
+summary(pm2021)
+
+par(mfrow = c(2, 2))
+plot(pm2021)
+par(mfrow = c(1, 1))
+
+options(scipen = 999)
+
+ggplot(aggregated_2021, aes(x= Circulation, y = Visitation)) + geom_point() + geom_smooth(method = "lm", formula = y ~ poly(x, 2), se = FALSE, color = "magenta") + labs(title = "Visitation vs. Circulation (2021)", x = "Circulation", y = "Visitation")
+ggplot(aggregated_2021, aes(x= Holds, y = Visitation)) + geom_point() + geom_smooth(method = "lm", formula = y ~ poly(x, 2), se = FALSE, color = "magenta") + labs(title = "Visitation vs. Holds (2021)", x = "Holds", y = "Visitation")
+ggplot(aggregated_2021, aes(x= Sessions, y = Visitation)) + geom_point() + geom_smooth(method = "lm", formula = y ~ poly(x, 2), se = FALSE, color = "magenta") + labs(title = "Visitation vs. Sessions (2021)", x = "Sessions", y = "Visitation")
+```
+
+##### IV.III.III. 2024
+
+```{R}
+summary(pm2024)
+
+options(scipen = 999)
+
+ggplot(aggregated_2024, aes(x= Circulation, y = Visitation)) + geom_point() + geom_smooth(method = "lm", formula = y ~ poly(x, 2), se = FALSE, color = "magenta") + labs(title = "Visitation vs. Circulation (2024)", x = "Circulation", y = "Visitation")
+ggplot(aggregated_2024, aes(x= Holds, y = Visitation)) + geom_point() + geom_smooth(method = "lm", formula = y ~ poly(x, 2), se = FALSE, color = "magenta") + labs(title = "Visitation vs. Holds (2024)", x = "Holds", y = "Visitation")
+ggplot(aggregated_2024, aes(x= Sessions, y = Visitation)) + geom_point() + geom_smooth(method = "lm", formula = y ~ poly(x, 2), se = FALSE, color = "magenta") + labs(title = "Visitation vs. Sessions (2024)", x = "Sessions", y = "Visitation")
+```

@@ -3,12 +3,12 @@ title: "Chapter 3 HW"
 author: "Ulices Gonzalez"
 date: "March 6th, 2025"
 output:
-  word_document: default
-  pdf_document: default
   html_document:
     fig_height: 4
     highlight: pygments
     theme: spacelab
+  pdf_document: default
+  word_document: default
 ---
 
 ```{r setup, include=FALSE}
