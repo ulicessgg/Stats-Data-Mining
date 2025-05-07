@@ -1,0 +1,80 @@
+---
+title: "Chapter 7 HW"
+author: "Ulices Gonzalez"
+date: "May 6th, 2025"
+output:
+  word_document: default
+  pdf_document: default
+  html_document:
+    fig_height: 4
+    highlight: pygments
+    theme: spacelab
+---
+
+```{r setup, include=FALSE}
+# DO NOT ALTER CODE IN THIS CHUNK
+knitr::opts_chunk$set(echo = TRUE)
+library(dplyr)
+library(ggplot2)
+```
+
+------------------------------------------------------------------------
+
+## Conceptual Questions
+
+### 3. Suppose we ft a curve with basis functions b1(X) = X, b2(X) = (X − 1)2I(X ≥ 1). (Note that I(X ≥ 1) equals 1 for X ≥ 1 and 0 otherwise.) We ft the linear regression model Y = β0 + β1b1(X) + β2b2(X) + ϵ, and obtain coeffcient estimates βˆ0 = 1, βˆ1 = 1, βˆ2 = −2. Sketch the estimated curve between X = −2 and X = 2. Note the intercepts, slopes, and other relevant information.
+
+## Applied Questions
+
+### 6. In this exercise, you will further analyze the Wage data set considered throughout this chapter.
+
+#### (a) Perform polynomial regression to predict wage using age. Use cross-validation to select the optimal degree d for the polynomial. What degree was chosen, and how does this compare to the results of hypothesis testing using ANOVA? Make a plot of the resulting polynomial ft to the data.
+
+```{R}
+
+```
+
+#### (b) Fit a step function to predict wage using age, and perform crossvalidation to choose the optimal number of cuts. Make a plot of the fit obtained.
+
+```{R}
+
+```
+
+### 9. This question uses the variables dis (the weighted mean of distances to fve Boston employment centers) and nox (nitrogen oxides concentration in parts per 10 million) from the Boston data. We will treat dis as the predictor and nox as the response.
+
+#### (a) Use the poly() function to ft a cubic polynomial regression to predict nox using dis. Report the regression output, and plot the resulting data and polynomial fits.
+
+```{R}
+
+```
+
+#### (b) Plot the polynomial fts for a range of diferent polynomial degrees (say, from 1 to 10), and report the associated residual sum of squares.
+
+```{R}
+
+```
+
+#### (c) Perform cross-validation or another approach to select the optimal degree for the polynomial, and explain your results.
+
+```{R}
+
+```
+
+#### (d) Use the bs() function to ft a regression spline to predict nox using dis. Report the output for the ft using four degrees of freedom. How did you choose the knots? Plot the resulting ft.
+
+```{R}
+
+```
+
+#### (e) Now ft a regression spline for a range of degrees of freedom, and plot the resulting fts and report the resulting RSS. Describe the results obtained.
+
+```{R}
+
+```
+
+#### (f) Perform cross-validation or another approach in order to select the best degrees of freedom for a regression spline on this data. Describe your results.
+
+```{R}
+
+```
+
