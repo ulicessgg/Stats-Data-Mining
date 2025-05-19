@@ -1,7 +1,7 @@
 ---
 title: "MATH 448 Project Progress Report II"
 author: "Ulices Gonzalez"
-date: "April 22nd, 2025"
+date: "May 23rd, 2025"
 output:
   html_document:
     fig_height: 4
@@ -23,6 +23,7 @@ library(knitr)
 library(heatmaply)
 library(lmtest)
 library(sandwich)
+library(splines)
 ```
 
 ------------------------------------------------------------------------
@@ -515,43 +516,214 @@ ggplot(aggregated_2024, aes(x = Sessions, y = Visitation)) + geom_point() + geom
 #### IV.IV. Cubic Spline
 
 ```{R}
+cs2019Circ <- lm(Visitation ~ bs(Circulation, df = 4), data = aggregated_2019)
+
 ```
 
 ##### IV.IV.I. 2019
 
 ```{R}
+cs2019Circ <- lm(Visitation ~ bs(Circulation, df = 4), data = aggregated_2019)
+predictedCS2019Circ <- predict(cs2019Circ, newdata = aggregated_2019)
+plotted2019CSCirc <- data.frame(Circulation = aggregated_2019$Circulation, Predicted_Visitation = predictedCS2019Circ)
+plotted2019CSCirc <- plotted2019CSCirc %>% arrange(Circulation)
+
+ggplot(aggregated_2019, aes(x = Circulation, y = Visitation)) +
+  geom_point() +
+  geom_line(data = plotted2019CSCirc, aes(y = Predicted_Visitation), color = "magenta", linewidth = 1) +
+  labs(title = "Visitation vs. Circulation (2019)", x = "Circulation", y = "Visitation (Observed vs. Predicted)")
+
+cs2019Holds <- lm(Visitation ~ bs(Holds, df = 4), data = aggregated_2019)
+predictedCS2019Holds <- predict(cs2019Holds, newdata = aggregated_2019)
+plotted2019CSHolds <- data.frame(Holds = aggregated_2019$Holds, Predicted_Visitation = predictedCS2019Holds)
+plotted2019CSHolds <- plotted2019CSHolds %>% arrange(Holds)
+
+ggplot(aggregated_2019, aes(x = Holds, y = Visitation)) +
+  geom_point() +
+  geom_line(data = plotted2019CSHolds, aes(y = Predicted_Visitation), color = "magenta", linewidth = 1) +
+  labs(title = "Visitation vs. Holds (2019)", x = "Holds", y = "Visitation (Observed vs. Predicted)")
+
+cs2019Sess <- lm(Visitation ~ bs(Sessions, df = 4), data = aggregated_2019)
+predictedCS2019Sess <- predict(cs2019Sess, newdata = aggregated_2019)
+plotted2019CSSess <- data.frame(Sessions = aggregated_2019$Sessions, Predicted_Visitation = predictedCS2019Sess)
+plotted2019CSSess <- plotted2019CSSess %>% arrange(Sessions)
+
+ggplot(aggregated_2019, aes(x = Sessions, y = Visitation)) +
+  geom_point() +
+  geom_line(data = plotted2019CSSess, aes(y = Predicted_Visitation), color = "magenta", linewidth = 1) +
+  labs(title = "Visitation vs. Computer Sessions (2019)", x = "Sessions", y = "Visitation (Observed vs. Predicted)")
 ```
 
 ##### IV.IV.II. 2021
 
 ```{R}
+cs2021Circ <- lm(Visitation ~ bs(Circulation, df = 4), data = aggregated_2021)
+predictedCS2021Circ <- predict(cs2021Circ, newdata = aggregated_2021)
+plotted2021CSCirc <- data.frame(Circulation = aggregated_2021$Circulation, Predicted_Visitation = predictedCS2021Circ)
+plotted2021CSCirc <- plotted2021CSCirc %>% arrange(Circulation)
+
+ggplot(aggregated_2021, aes(x = Circulation, y = Visitation)) +
+  geom_point() +
+  geom_line(data = plotted2021CSCirc, aes(y = Predicted_Visitation), color = "magenta", linewidth = 1) +
+  labs(title = "Visitation vs. Circulation (2021)", x = "Circulation", y = "Visitation (Observed vs. Predicted)")
+
+cs2021Holds <- lm(Visitation ~ bs(Holds, df = 4), data = aggregated_2021)
+predictedCS2021Holds <- predict(cs2021Holds, newdata = aggregated_2021)
+plotted2021CSHolds <- data.frame(Holds = aggregated_2021$Holds, Predicted_Visitation = predictedCS2021Holds)
+plotted2021CSHolds <- plotted2021CSHolds %>% arrange(Holds)
+
+ggplot(aggregated_2021, aes(x = Holds, y = Visitation)) +
+  geom_point() +
+  geom_line(data = plotted2021CSHolds, aes(y = Predicted_Visitation), color = "magenta", linewidth = 1) +
+  labs(title = "Visitation vs. Holds (2021)", x = "Holds", y = "Visitation (Observed vs. Predicted)")
+
+cs2021Sess <- lm(Visitation ~ bs(Sessions, df = 4), data = aggregated_2021)
+predictedCS2021Sess <- predict(cs2021Sess, newdata = aggregated_2021)
+plotted2021CSSess <- data.frame(Sessions = aggregated_2021$Sessions, Predicted_Visitation = predictedCS2021Sess)
+plotted2021CSSess <- plotted2021CSSess %>% arrange(Sessions)
+
+ggplot(aggregated_2021, aes(x = Sessions, y = Visitation)) +
+  geom_point() +
+  geom_line(data = plotted2021CSSess, aes(y = Predicted_Visitation), color = "magenta", linewidth = 1) +
+  labs(title = "Visitation vs. Computer Sessions (2021)", x = "Sessions", y = "Visitation (Observed vs. Predicted)")
+
 ```
 
 ##### IV.IV.III. 2024
 
 ```{R}
+cs2024Circ <- lm(Visitation ~ bs(Circulation, df = 4), data = aggregated_2024)
+predictedCS2024Circ <- predict(cs2024Circ, newdata = aggregated_2024)
+plotted2024CSCirc <- data.frame(Circulation = aggregated_2024$Circulation, Predicted_Visitation = predictedCS2024Circ)
+plotted2024CSCirc <- plotted2024CSCirc %>% arrange(Circulation)
+
+ggplot(aggregated_2024, aes(x = Circulation, y = Visitation)) +
+  geom_point() +
+  geom_line(data = plotted2024CSCirc, aes(y = Predicted_Visitation), color = "magenta", linewidth = 1) +
+  labs(title = "Visitation vs. Circulation (2024)", x = "Circulation", y = "Visitation (Observed vs. Predicted)")
+
+cs2024Holds <- lm(Visitation ~ bs(Holds, df = 4), data = aggregated_2024)
+predictedCS2024Holds <- predict(cs2024Holds, newdata = aggregated_2024)
+plotted2024CSHolds <- data.frame(Holds = aggregated_2024$Holds, Predicted_Visitation = predictedCS2024Holds)
+plotted2024CSHolds <- plotted2024CSHolds %>% arrange(Holds)
+
+ggplot(aggregated_2024, aes(x = Holds, y = Visitation)) +
+  geom_point() +
+  geom_line(data = plotted2024CSHolds, aes(y = Predicted_Visitation), color = "magenta", linewidth = 1) +
+  labs(title = "Visitation vs. Holds (2024)", x = "Holds", y = "Visitation (Observed vs. Predicted)")
+
+cs2024Sess <- lm(Visitation ~ bs(Sessions, df = 4), data = aggregated_2024)
+predictedCS2024Sess <- predict(cs2024Sess, newdata = aggregated_2024)
+plotted2024CSSess <- data.frame(Sessions = aggregated_2024$Sessions, Predicted_Visitation = predictedCS2024Sess)
+plotted2024CSSess <- plotted2024CSSess %>% arrange(Sessions)
+
+ggplot(aggregated_2024, aes(x = Sessions, y = Visitation)) +
+  geom_point() +
+  geom_line(data = plotted2024CSSess, aes(y = Predicted_Visitation), color = "magenta", linewidth = 1) +
+  labs(title = "Visitation vs. Computer Sessions (2024)", x = "Sessions", y = "Visitation (Observed vs. Predicted)")
+
 ```
 
 #### IV.V. Natural Spline
 
-```{R}
-
-```
-
 ##### IV.V.I. 2019
 
 ```{R}
+ns2019Circ <- lm(Visitation ~ ns(Circulation, df = 4), data = aggregated_2019)
+predictedNS2019Circ <- predict(ns2019Circ, newdata = aggregated_2019)
+plotted2019NSCirc <- data.frame(Circulation = aggregated_2019$Circulation, Predicted_Visitation = predictedNS2019Circ)
+plotted2019NSCirc <- plotted2019NSCirc %>% arrange(Circulation)
 
+ggplot(aggregated_2019, aes(x = Circulation, y = Visitation)) +
+  geom_point() +
+  geom_line(data = plotted2019NSCirc, aes(y = Predicted_Visitation), color = "magenta", linewidth = 1) +
+  labs(title = "Visitation vs. Circulation (2019)", x = "Circulation", y = "Visitation (Observed vs. Predicted)")
+
+ns2019Holds <- lm(Visitation ~ ns(Holds, df = 4), data = aggregated_2019)
+predictedNS2019Holds <- predict(ns2019Holds, newdata = aggregated_2019)
+plotted2019NSHolds <- data.frame(Holds = aggregated_2019$Holds, Predicted_Visitation = predictedNS2019Holds)
+plotted2019NSHolds <- plotted2019NSHolds %>% arrange(Holds)
+
+ggplot(aggregated_2019, aes(x = Holds, y = Visitation)) +
+  geom_point() +
+  geom_line(data = plotted2019NSHolds, aes(y = Predicted_Visitation), color = "magenta", linewidth = 1) +
+  labs(title = "Visitation vs. Holds (2019)", x = "Holds", y = "Visitation (Observed vs. Predicted)")
+
+ns2019Sess <- lm(Visitation ~ ns(Sessions, df = 4), data = aggregated_2019)
+predictedNS2019Sess <- predict(ns2019Sess, newdata = aggregated_2019)
+plotted2019NSSess <- data.frame(Sessions = aggregated_2019$Sessions, Predicted_Visitation = predictedNS2019Sess)
+plotted2019NSSess <- plotted2019NSSess %>% arrange(Sessions)
+
+ggplot(aggregated_2019, aes(x = Sessions, y = Visitation)) +
+  geom_point() +
+  geom_line(data = plotted2019NSSess, aes(y = Predicted_Visitation), color = "magenta", linewidth = 1) +
+  labs(title = "Visitation vs. Computer Sessions (2019)", x = "Sessions", y = "Visitation (Observed vs. Predicted)")
 ```
 
 ##### IV.V.II. 2021
 
 ```{R}
+ns2021Circ <- lm(Visitation ~ ns(Circulation, df = 4), data = aggregated_2021)
+predictedNS2021Circ <- predict(ns2021Circ, newdata = aggregated_2021)
+plotted2021NSCirc <- data.frame(Circulation = aggregated_2021$Circulation, Predicted_Visitation = predictedNS2021Circ)
+plotted2021NSCirc <- plotted2021NSCirc %>% arrange(Circulation)
 
+ggplot(aggregated_2021, aes(x = Circulation, y = Visitation)) +
+  geom_point() +
+  geom_line(data = plotted2021NSCirc, aes(y = Predicted_Visitation), color = "magenta", linewidth = 1) +
+  labs(title = "Visitation vs. Circulation (2021)", x = "Circulation", y = "Visitation (Observed vs. Predicted)")
+
+ns2021Holds <- lm(Visitation ~ ns(Holds, df = 4), data = aggregated_2021)
+predictedNS2021Holds <- predict(ns2021Holds, newdata = aggregated_2021)
+plotted2021NSHolds <- data.frame(Holds = aggregated_2021$Holds, Predicted_Visitation = predictedNS2021Holds)
+plotted2021NSHolds <- plotted2021NSHolds %>% arrange(Holds)
+
+ggplot(aggregated_2021, aes(x = Holds, y = Visitation)) +
+  geom_point() +
+  geom_line(data = plotted2021NSHolds, aes(y = Predicted_Visitation), color = "magenta", linewidth = 1) +
+  labs(title = "Visitation vs. Holds (2021)", x = "Holds", y = "Visitation (Observed vs. Predicted)")
+
+ns2021Sess <- lm(Visitation ~ ns(Sessions, df = 4), data = aggregated_2021)
+predictedNS2021Sess <- predict(ns2021Sess, newdata = aggregated_2021)
+plotted2021NSSess <- data.frame(Sessions = aggregated_2021$Sessions, Predicted_Visitation = predictedNS2021Sess)
+plotted2021NSSess <- plotted2021NSSess %>% arrange(Sessions)
+
+ggplot(aggregated_2021, aes(x = Sessions, y = Visitation)) +
+  geom_point() +
+  geom_line(data = plotted2021NSSess, aes(y = Predicted_Visitation), color = "magenta", linewidth = 1) +
+  labs(title = "Visitation vs. Computer Sessions (2021)", x = "Sessions", y = "Visitation (Observed vs. Predicted)")
 ```
 
 ##### IV.V.III. 2024
 
 ```{R}
+ns2024Circ <- lm(Visitation ~ ns(Circulation, df = 4), data = aggregated_2024)
+predictedNS2024Circ <- predict(ns2024Circ, newdata = aggregated_2024)
+plotted2024NSCirc <- data.frame(Circulation = aggregated_2024$Circulation, Predicted_Visitation = predictedNS2024Circ)
+plotted2024NSCirc <- plotted2024NSCirc %>% arrange(Circulation)
 
+ggplot(aggregated_2024, aes(x = Circulation, y = Visitation)) +
+  geom_point() +
+  geom_line(data = plotted2024NSCirc, aes(y = Predicted_Visitation), color = "magenta", linewidth = 1) +
+  labs(title = "Visitation vs. Circulation (2024)", x = "Circulation", y = "Visitation (Observed vs. Predicted)")
+
+ns2024Holds <- lm(Visitation ~ ns(Holds, df = 4), data = aggregated_2024)
+predictedNS2024Holds <- predict(ns2024Holds, newdata = aggregated_2024)
+plotted2024NSHolds <- data.frame(Holds = aggregated_2024$Holds, Predicted_Visitation = predictedNS2024Holds)
+plotted2024NSHolds <- plotted2024NSHolds %>% arrange(Holds)
+
+ggplot(aggregated_2024, aes(x = Holds, y = Visitation)) +
+  geom_point() +
+  geom_line(data = plotted2024NSHolds, aes(y = Predicted_Visitation), color = "magenta", linewidth = 1) +
+  labs(title = "Visitation vs. Holds (2024)", x = "Holds", y = "Visitation (Observed vs. Predicted)")
+
+ns2024Sess <- lm(Visitation ~ ns(Sessions, df = 4), data = aggregated_2024)
+predictedNS2024Sess <- predict(ns2024Sess, newdata = aggregated_2024)
+plotted2024NSSess <- data.frame(Sessions = aggregated_2024$Sessions, Predicted_Visitation = predictedNS2024Sess)
+plotted2024NSSess <- plotted2024NSSess %>% arrange(Sessions)
+
+ggplot(aggregated_2024, aes(x = Sessions, y = Visitation)) +
+  geom_point() +
+  geom_line(data = plotted2024NSSess, aes(y = Predicted_Visitation), color = "magenta", linewidth = 1) +
+  labs(title = "Visitation vs. Computer Sessions (2024)", x = "Sessions", y = "Visitation (Observed vs. Predicted)")
 ```
