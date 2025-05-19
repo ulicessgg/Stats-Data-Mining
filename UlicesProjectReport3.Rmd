@@ -3,11 +3,11 @@ title: "MATH 448 Project Progress Report II"
 author: "Ulices Gonzalez"
 date: "April 22nd, 2025"
 output:
-  word_document: default
   html_document:
     fig_height: 4
     highlight: pygments
     theme: spacelab
+  word_document: default
   pdf_document: default
 ---
 
@@ -61,13 +61,13 @@ Lastly Computer Sessions in 2019 had a clear relationship with visitation, with 
 
 ## Simple Linear Regression Model
 
-Simple linear regression models were used to analyze the individual relationships between library visitation (Visitation) and each of the predictor variables: Circulation, Holds, and Computer Sessions (Sessions) across 2019, 2021, and 2024. For each year and each predictor, a separate linear model was fitted to observe the direction and strength of their relationship with Visitation. Specifically, the relationship between Circulation and Visitation appears positive and statistically significant across all three years. However it's much more clear after applying the linear regression that there is a sharp fall off in visitation which shows the effect of low circulation on visitation numbers. Looking at the results from the regression for 2024 there is an increase both in circulation and visitation with the relationship becoming much more positive. 
+Simple linear regression models were used to analyze the individual relationships between library visitation (Visitation) and each of the predictor variables: Circulation, Holds, and Computer Sessions (Sessions) across 2019, 2021, and 2024. For each year and each predictor, a separate linear model was fitted to observe the direction and strength of their relationship with Visitation. Specifically, the relationship between Circulation and Visitation appears positive and statistically significant across all three years. However it's much more clear after applying the linear regression that there is a sharp fall off in visitation which shows the effect of low circulation on visitation numbers. Looking at the results from the regression for 2024 there is an increase both in circulation and visitation with the relationship becoming much more positive.
 
-Looking at the Relationship between visitation and holds shows a similar Trend however after applying the linear regression the relationship is much more consistent between 2019 and 2021 but looking forward to 2024 there is a large increase in positivity between holds and visitation. While it is significant statistically it isn't the most significant of the three predictors and if anything is the least significant. Computer sessions had the most varied relationship with visitation in 2019 it was clear that it was positively associated with visitation numbers however moving towards 2021 this was not the case as visitation dropped and so did computer sessions leading to the relationship less positive as a result. Lastly compared to what it is in 2024 it's clear that computer sessions do have a positive relationship and impact on visitation but have not recovered  to what they were in 2019 but have recovered and become more significant since 2021.
+Looking at the Relationship between visitation and holds shows a similar Trend however after applying the linear regression the relationship is much more consistent between 2019 and 2021 but looking forward to 2024 there is a large increase in positivity between holds and visitation. While it is significant statistically it isn't the most significant of the three predictors and if anything is the least significant. Computer sessions had the most varied relationship with visitation in 2019 it was clear that it was positively associated with visitation numbers however moving towards 2021 this was not the case as visitation dropped and so did computer sessions leading to the relationship less positive as a result. Lastly compared to what it is in 2024 it's clear that computer sessions do have a positive relationship and impact on visitation but have not recovered to what they were in 2019 but have recovered and become more significant since 2021.
 
 ## Multiple Linear Regression Model
 
-Similarly to the simple linear regression multiple linear regression models are applied to the data amongst all three years to take into account their collective relationships in influencing visitation. However compared to the simple linear regressions there is a much more obvious shift in variability in the between the data set and its regression models. The high R-squared values for all three years explain a substantial portion of the variance in library visitation while the rest can be associated to the inconsistency amongst each of the predictor variables data entries. The results are very much the same as the simple linear regression models but  it is much clearer that the holds amongst all three years  have the least influence on visitation as opposed to circulation and computer sessions. This also reiterates the fact that both circulation and computer sessions have a larger impact on visitation. 
+Similarly to the simple linear regression multiple linear regression models are applied to the data amongst all three years to take into account their collective relationships in influencing visitation. However compared to the simple linear regressions there is a much more obvious shift in variability in the between the data set and its regression models. The high R-squared values for all three years explain a substantial portion of the variance in library visitation while the rest can be associated to the inconsistency amongst each of the predictor variables data entries. The results are very much the same as the simple linear regression models but it is much clearer that the holds amongst all three years have the least influence on visitation as opposed to circulation and computer sessions. This also reiterates the fact that both circulation and computer sessions have a larger impact on visitation.
 
 ## Polynomial Regression Model
 
@@ -108,6 +108,7 @@ data_2024 <- load_year_data(2024)
 ```
 
 ### II. Data Preparation
+
 #### II.I. Data Processing
 
 ```{R}
@@ -259,7 +260,9 @@ theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5))
 ```
 
 ### IV. Regression Methods Applied
+
 #### IV.I. Simple Linear Regression
+
 ```{R}
 sLm2019Circ <- lm(Visitation ~ Circulation, data = aggregated_2019)
 sLm2019Holds <- lm(Visitation ~ Holds, data = aggregated_2019)
@@ -320,6 +323,7 @@ ggplot(aggregated_2024, aes(x = Sessions, y = Visitation)) + geom_point() + geom
 ```
 
 #### IV.II. Multiple Linear Regression
+
 ```{R}
 mLm2019 <- lm(Visitation ~ Circulation + Holds + Sessions, data = aggregated_2019)
 mLm2021 <- lm(Visitation ~ Circulation + Holds + Sessions, data = aggregated_2021)
@@ -506,4 +510,48 @@ plotted2024Sess <- data.frame(Sessions = aggregated_2024$Sessions, Predicted_Vis
 plotted2024Sess <- plotted2024Sess %>% arrange(Sessions)
 
 ggplot(aggregated_2024, aes(x = Sessions, y = Visitation)) + geom_point() + geom_line(data = plotted2024Sess, aes(y = Predicted_Visitation), color = "magenta", linewidth = 1) + labs(title = "Visitation vs. Computer Sessions (2024)", x = "Sessions", y = "Visitation (Observed vs. Predicted)")
+```
+
+#### IV.IV. Cubic Spline
+
+```{R}
+```
+
+##### IV.IV.I. 2019
+
+```{R}
+```
+
+##### IV.IV.II. 2021
+
+```{R}
+```
+
+##### IV.IV.III. 2024
+
+```{R}
+```
+
+#### IV.V. Natural Spline
+
+```{R}
+
+```
+
+##### IV.V.I. 2019
+
+```{R}
+
+```
+
+##### IV.V.II. 2021
+
+```{R}
+
+```
+
+##### IV.V.III. 2024
+
+```{R}
+
 ```

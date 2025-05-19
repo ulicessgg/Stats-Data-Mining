@@ -1,0 +1,185 @@
+---
+title: "Chapter 8 HW"
+author: "Ulices Gonzalez"
+date: "May 15th, 2025"
+output:
+  word_document: default
+  pdf_document: default
+  html_document:
+    fig_height: 4
+    highlight: pygments
+    theme: spacelab
+---
+
+```{r setup, include=FALSE}
+# DO NOT ALTER CODE IN THIS CHUNK
+knitr::opts_chunk$set(echo = TRUE)
+library(dplyr)
+library(ggplot2)
+```
+
+------------------------------------------------------------------------
+
+## Conceptual Questions
+
+### 3. This question relates to the plots in Figure 8.14.
+
+#### (a) Sketch the tree corresponding to the partition of the predictor space illustrated in the left-hand panel of Figure 8.14. The numbers inside the boxes indicate the mean of Y within each region.
+
+####  (b) Create a diagram similar to the left-hand panel of Figure 8.14, using the tree illustrated in the right-hand panel of the same figure. You should divide up the predictor space into the correct regions, and indicate the mean for each region.
+
+------------------------------------------------------------------------
+
+## Applied Questions
+
+### 8. In the lab, a classifcation tree was applied to the Carseats data set after converting Sales into a qualitative response variable. Now we will seek to predict Sales using regression trees and related approaches, treating the response as a quantitative variable.
+
+#### (a) Split the data set into a training set and a test set.
+
+```{R}
+library(tree)
+library(randomForest)
+carseats <- read.csv("DataSets/Carseats.csv")
+set.seed(1)
+carSeatsTrain = sample(1:nrow(carseats), nrow(carseats) / 2)
+carTrainSet = carseats[carSeatsTrain, ]
+carTestSet = carseats[-carSeatsTrain,]
+```
+
+#### (b) Fit a regression tree to the training set. Plot the tree, and interpret the results. What test MSE do you obtain?
+
+```{R}
+carTree = tree(Sales~.,data = carTrainSet)
+summary(carTree)
+plot(carTree)
+text(carTree ,pretty =0)
+mean((predict(carTree,newdata = carTestSet) - carTestSet$Sales)^2)
+```
+
+The MSE is roughly
+
+#### (c) Use cross-validation in order to determine the optimal level of tree complexity. Does pruning the tree improve the test MSE?
+
+```{R}
+altCarSeats = cv.tree(carTree)
+plot(altCarSeats$size, altCarSeats$dev, type = "b")
+carTreePruned = prune.tree(carTree, best = 8)
+plot(carTreePruned)
+text(carTreePruned,pretty=0)
+mean((predict(carTreePruned,newdata = carTestSet) - carTestSet$Sales)^2)
+```
+
+The MSE is roughly after pruning show a 
+
+#### (d) Use the bagging approach in order to analyze this data. What test MSE do you obtain? Use the importance() function to determine which variables are most important.
+
+```{R}
+carSeatsBag = randomForest(Sales~.,data=carTrainSet,mtry = 10, importance = TRUE)
+mean((predict(carSeatsBag,newdata = carTestSet) - carTestSet$Sales)^2)
+importance(carSeatsBag)
+varImpPlot(carSeatsBag)
+```
+
+#### (e) Use random forests to analyze this data. What test MSE do you obtain? Use the importance() function to determine which variables are most important. Describe the efect of m, the number of variables considered at each split, on the error rate obtained
+
+```{R}
+carSeatsForest = randomForest(Sales~.,data=carTrainSet,mtry = 3, importance = TRUE)
+mean((predict(carSeatsForest,newdata = carTestSet) - carTestSet$Sales)^2)
+importance(carSeatsForest)
+varImpPlot(carSeatsForest)
+```
+
+### 10. We now use boosting to predict Salary in the Hitters data set.
+
+#### (a) Remove the observations for whom the salary information is unknown, and then log-transform the salaries.
+
+```{R}
+library(gbm)
+hitters <- read.csv("DataSets/Hitters.csv")
+hitters = na.omit(hitters)
+hitters$Salary = log(hitters$Salary)
+```
+
+#### (b) Create a training set consisting of the frst 200 observations, and a test set consisting of the remaining observations.
+
+```{R}
+hittersTrain = 1:200
+hittersTrainSet = hitters[hittersTrain, ]
+hittersTestSet = hitters[-hittersTrain,]
+
+hittersTrainSet$League = as.factor(hittersTrainSet$League)
+hittersTrainSet$Division = as.factor(hittersTrainSet$Division)
+hittersTestSet$League = as.factor(hittersTestSet$League)
+hittersTestSet$Division = as.factor(hittersTestSet$Division)
+hittersTestSet$NewLeague = as.factor(hittersTestSet$NewLeague) 
+hittersTrainSet$NewLeague = as.factor(hittersTrainSet$NewLeague)
+```
+
+#### (c) Perform boosting on the training set with 1,000 trees for a range of values of the shrinkage parameter λ. Produce a plot with diferent shrinkage values on the x-axis and the corresponding training set MSE on the y-axis.
+
+```{R}
+hittersShrink = seq(0.001, 0.2, by = 0.01)
+hittersTrainMSE = numeric(length(hittersShrink))
+
+for (i in seq_along(hittersShrink)) 
+{
+  hittersBoost = gbm(Salary ~ ., data = hittersTrainSet, n.trees = 1000, shrinkage = hittersShrink[i], distribution = "gaussian", verbose = FALSE)
+  hittersPredTrain = predict(hittersBoost, newdata = hittersTrainSet, n.trees = 1000)
+  hittersTrainMSE[i] = mean((hittersPredTrain - hittersTrainSet$Salary)^2)
+}
+
+plot(hittersShrink, hittersTrainMSE, type = "l")
+```
+
+#### (d) Produce a plot with diferent shrinkage values on the x-axis and the corresponding test set MSE on the y-axis
+
+```{R}
+hittersTestMSE = numeric(length(hittersShrink))
+
+for (i in seq_along(hittersShrink)) 
+{
+  hittersBoost = gbm(Salary ~ ., data = hittersTrainSet, n.trees = 1000, shrinkage = hittersShrink[i], distribution = "gaussian", verbose = FALSE)
+  hittersTestPred = predict(hittersBoost, newdata = hittersTestSet, n.trees = 1000)
+  hittersTestMSE[i] = mean((hittersTestPred - hittersTestSet$Salary)^2)
+}
+
+plot(hittersShrink, hittersTestMSE, type = "l")
+```
+
+#### (e) Compare the test MSE of boosting to the test MSE that results from applying two  of the regression approaches seen in Chapters 3 and 6.
+
+```{R}
+hittersLinear = lm(Salary ~ ., data = hittersTrainSet)
+hittersLinearPred = predict(hittersLinear, newdata = hittersTestSet)
+mean((hittersLinearPred - hittersTestSet$Salary)^2)
+
+hittersColumns = sapply(hittersTrainSet, is.numeric)
+hittersColNames = names(hittersTrainSet)[hittersColumns & names(hittersTrainSet) != "Salary"]
+hittersFormula = as.formula(paste("Salary ~ . +", paste(paste0("I(", hittersColNames, "^2)"), collapse = " + ")))
+
+hittersPolynomial = lm(hittersFormula, data = hittersTrainSet)
+hittersPolynomialPred = predict(hittersPolynomial, newdata = hittersTestSet)
+mean((hittersPolynomialPred - hittersTestSet$Salary)^2)
+```
+
+#### (f) Which variables appear to be the most important predictors in the boosted model?
+
+```{R}
+
+```
+
+#### (g) Now apply bagging to the training set. What is the test set MSE for this approach?
+
+```{R}
+hittersTrainSet$League = as.factor(hittersTrainSet$League)
+hittersTrainSet$Division = as.factor(hittersTrainSet$Division)
+hittersTestSet$League = as.factor(hittersTestSet$League)
+hittersTestSet$Division = as.factor(hittersTestSet$Division)
+
+hittersBag = randomForest(Salary ~ ., data = hittersTrainSet, mtry = ncol(hittersTrainSet) - 1, importance = TRUE)
+hittersBagPred = predict(hittersBag, newdata = hittersTestSet)
+mean((hittersBagPred - hittersTestSet$Salary)^2)
+importance(hittersBag)
+varImpPlot(hittersBag)
+```
+
