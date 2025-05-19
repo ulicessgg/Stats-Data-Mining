@@ -24,6 +24,8 @@ library(ggplot2)
 
 ### 3. Suppose we ft a curve with basis functions b1(X) = X, b2(X) = (X − 1)2I(X ≥ 1). (Note that I(X ≥ 1) equals 1 for X ≥ 1 and 0 otherwise.) We ft the linear regression model Y = β0 + β1b1(X) + β2b2(X) + ϵ, and obtain coeffcient estimates βˆ0 = 1, βˆ1 = 1, βˆ2 = −2. Sketch the estimated curve between X = −2 and X = 2. Note the intercepts, slopes, and other relevant information.
 
+IMAGE GOES HERE
+
 ## Applied Questions
 
 ### 6. In this exercise, you will further analyze the Wage data set considered throughout this chapter.
@@ -31,50 +33,157 @@ library(ggplot2)
 #### (a) Perform polynomial regression to predict wage using age. Use cross-validation to select the optimal degree d for the polynomial. What degree was chosen, and how does this compare to the results of hypothesis testing using ANOVA? Make a plot of the resulting polynomial ft to the data.
 
 ```{R}
+library(boot)
+wage <- read.csv("DataSets/Wage.csv")
+set.seed(1)
+
+degree <- 1:10
+wageErrsPoly <- rep(0, length(degree))
+
+for (d in degree) 
+{
+  wageFit <- glm(wage ~ poly(age, d), data = wage)
+  wageErrsPoly[d] <- cv.glm(wage, wageFit, K = 10)$delta[1]
+}
+
+optDeg <- which.min(wageErrsPoly)
+optDeg
+
+wagePoly <- lm(wage ~ poly(age, optDeg, raw = TRUE), data = wage)
+wageAges <- seq(min(wage$age), max(wage$age), by = 0.1)
+wagePredPoly <- predict(wagePoly, newdata = data.frame(age = wageAges))
+
+ggplot(wage, aes(x = age, y = wage)) + geom_point() + geom_line(data = data.frame(age = wageAges, wage = wagePredPoly), color = "magenta", linewidth = 1)
 
 ```
 
 #### (b) Fit a step function to predict wage using age, and perform crossvalidation to choose the optimal number of cuts. Make a plot of the fit obtained.
 
-```{R}
-
-```
+Part B was skipped due to errors during compilation of my markdown file as well as instances of the compiler being stuck on this chunk so I have opted to ommit it and take a penalty on overall grade.
 
 ### 9. This question uses the variables dis (the weighted mean of distances to fve Boston employment centers) and nox (nitrogen oxides concentration in parts per 10 million) from the Boston data. We will treat dis as the predictor and nox as the response.
 
 #### (a) Use the poly() function to ft a cubic polynomial regression to predict nox using dis. Report the regression output, and plot the resulting data and polynomial fits.
 
 ```{R}
+boston <- read.csv("DataSets/Boston.csv")
+
+bostonPoly <- lm(nox ~ poly(dis, 3), data = boston)
+summary(bostonPoly)
+
+plot(boston$dis, boston$nox, col = "cyan", xlab = "dis", ylab = "nox")
+bostonGrid <- seq(min(boston$dis), max(boston$dis))
+bostonPred <- predict(bostonPoly, newdata = data.frame(dis = bostonGrid))
+lines(bostonGrid, bostonPred, col = "magenta")
 
 ```
 
 #### (b) Plot the polynomial fts for a range of diferent polynomial degrees (say, from 1 to 10), and report the associated residual sum of squares.
 
 ```{R}
+bostonRSS <- numeric(10)
+degrees <- 1:10
+
+plot(boston$dis, boston$nox, col = "cyan", xlab = "dis", ylab = "nox")
+
+for (d in degrees) 
+{
+  bostonPoly <- lm(nox ~ poly(dis, d), data = boston)
+  bostonRSS[d] <- sum(residuals(bostonPoly)^2)
+  bostonGrid <- seq(min(boston$dis), max(boston$dis), length.out = 100)
+  bostonPred <- predict(bostonPoly, newdata = data.frame(dis = bostonGrid))
+  lines(bostonGrid, bostonPred, col = rainbow(10)[d], lwd = 2)
+}
+
+legend("topright", legend = paste("Degree", degrees), col = rainbow(10), lwd = 2)
+print(data.frame(Degree = degrees, RSS = bostonRSS))
 
 ```
 
 #### (c) Perform cross-validation or another approach to select the optimal degree for the polynomial, and explain your results.
 
 ```{R}
+library(boot)
 
+bostonCV <- numeric(10)
+degrees <- 1:10
+
+for (d in degrees) {
+  bostonFit <- glm(nox ~ poly(dis, d), data = boston)
+  bostonCV[d] <- cv.glm(boston, bostonFit, K = 10)$delta[1]
+}
+
+plot(degrees, bostonCV, type = "b", col = "cyan", xlab = "degree", ylab = "cv err")
+optDeg <- which.min(bostonCV)
+points(optDeg, min(bostonCV), col = "magenta")
 ```
 
 #### (d) Use the bs() function to ft a regression spline to predict nox using dis. Report the output for the ft using four degrees of freedom. How did you choose the knots? Plot the resulting ft.
 
 ```{R}
+library(splines)
 
+bostonKnots <- quantile(boston$dis, probs = c(0.25, 0.5, 0.75))
+
+bostonSpline <- lm(nox ~ bs(dis, knots = bostonKnots, degree = 3), data = boston) 
+summary(bostonSpline)
+
+plot(boston$dis, boston$nox, col = "cyan", xlab = "dis", ylab = "nox")
+
+bostonGrid <- seq(min(boston$dis), max(boston$dis), length.out = 100)
+bostonPred <- predict(bostonSpline, newdata = data.frame(dis = bostonGrid))
+lines(bostonGrid, bostonPred, col = "magenta", lwd = 2)
+abline(v = bostonKnots, lty = 2, col = "gray") 
 ```
 
 #### (e) Now ft a regression spline for a range of degrees of freedom, and plot the resulting fts and report the resulting RSS. Describe the results obtained.
 
 ```{R}
+bostonRSS <- numeric(10)
+bostonDF <- 3:12 
 
+plot(boston$dis, boston$nox, col = "cyan", xlab = "dis", ylab = "nox")
+
+for (df in bostonDF) 
+{
+  if (df > 1) 
+  {
+    numKnots <- df - 1
+    bostonKnots <- quantile(boston$dis, probs = seq(0, 1, length.out = numKnots + 2)[2:(numKnots + 1)])
+    bostonSpline <- lm(nox ~ bs(dis, knots = bostonKnots, degree = 3), data = boston)
+  } 
+  else 
+  {
+    bostonSpline <- lm(nox ~ bs(dis, degree = 3, df = df), data = boston) 
+  }
+  bostonRSS[df - 2] <- sum(residuals(bostonSpline)^2)
+  bostonGrid <- seq(min(boston$dis), max(boston$dis), length.out = 100)
+  bostonPred <- predict(bostonSpline, newdata = data.frame(dis = bostonGrid))
+  lines(bostonGrid, bostonPred, col = rainbow(length(bostonDF))[df - 2], lwd = 2)
+}
+
+legend("topright", legend = paste("df =", bostonDF), col = rainbow(length(bostonDF)), lwd = 2)
+print(data.frame(Degrees_of_Freedom = bostonDF, RSS = bostonRSS))
 ```
 
 #### (f) Perform cross-validation or another approach in order to select the best degrees of freedom for a regression spline on this data. Describe your results.
 
 ```{R}
+bostonCV <- numeric(10)
+bostonDF <- 3:12
 
+for (i in seq_along(bostonDF)) {
+  df <- bostonDF[i]
+  bostonFit <- glm(nox ~ bs(dis, df = df, degree = 3), data = boston)
+  bostonCV[i] <- cv.glm(boston, bostonFit, K = 10)$delta[1]
+}
+
+plot(bostonDF, bostonCV, type = "b", col = "cyan")
+optDF <- bostonDF[which.min(bostonCV)]
+optDF
+
+points(optDF, min(bostonCV), col = "magenta")
+
+print(data.frame(Degrees_of_Freedom = bostonDF, CV_Error = bostonCV))
 ```
 
