@@ -3,11 +3,11 @@ title: "MATH 448 Project Progress Report II"
 author: "Ulices Gonzalez"
 date: "May 23rd, 2025"
 output:
+  word_document: default
   html_document:
     fig_height: 4
     highlight: pygments
     theme: spacelab
-  word_document: default
   pdf_document: default
 ---
 
@@ -76,9 +76,19 @@ Lastly, polynomial regressions were used in order to take into account that ther
 
 The higher R-squared values for the polynomial models compared to the linear models for each year suggest that incorporating non-linear terms improves the model's ability to explain the variance in Visitation. The statistical significance of the linear and quadratic terms varies across predictors and years, indicating that the nature of the relationship may differ for each factor which could be associated with the pandemics effect on library services. The results of the polynomial regression were very similar to that of the multiple linear regressions albeit show more stable predictions if we look at the regression line on the plots. The main takeaway however is the fact that the relationships are shown to be slightly more consistent than the rest of the models.
 
+## Cubic Spline
+
+INSERT TEXT
+
+## Natural Spline
+
+INSERT TEXT
+
 ## Model Comparisons
 
 Due to the way that this data set is set up it was difficult to choose which regression methods to apply given that I'm looking at 3 years worth of data and working with a limited amount of predictor variables that influence visitation. While there are a lot of options in terms of the methods that we can apply the most suitable the linear regressions along with the polynomial regressions because of all the data entries being numerical and with them being somewhat of a small data set these regression methods were simple enough to apply to them. Of all the three the best performing one in my opinion had to be the polynomial regression because it was able to take into account not just the fact that there's the potential for a nonlinear relationship amongst each of the predictors and visitation but also the fact that it showed more stability when it came to the predictions created with the regression. This made the data much easier to interpret and analyze compared to the two linear regression types that were performed. The simple in your regression while it was useful to look at the relationship of visitation with each predictor it didn't perform as well as I thought given the fact that there are relationships between each of the predictors and not just with the visitation itself. This can be seen in the graphs that were plotted as strictly positive relationships and this isn't realistic given the way that Trends in library use are. Similarly to the polynomial the multiple regression method was effective in considering the changes in the relationships amongst the visitation and the predictors showed accurate predictions when compared to the original data set with enough information being provided to explain the variability. However the main issue I saw when performing the multiple linear regression is the fact that there is a lot more variability compared to that of the polynomial making it more difficult to analyze. Overall, while all three of the methods I applied were useful in analyzing the data, the best performing and most suitable choice for the data set was the polynomial regression especially because it fit the data the best amongst the three.
+
+EDIT TO TALK ABOUT THE SPLINES
 
 ## Appendix
 
@@ -514,11 +524,6 @@ ggplot(aggregated_2024, aes(x = Sessions, y = Visitation)) + geom_point() + geom
 ```
 
 #### IV.IV. Cubic Spline
-
-```{R}
-cs2019Circ <- lm(Visitation ~ bs(Circulation, df = 4), data = aggregated_2019)
-
-```
 
 ##### IV.IV.I. 2019
 
